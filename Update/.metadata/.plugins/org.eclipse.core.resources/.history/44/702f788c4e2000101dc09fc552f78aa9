@@ -1,0 +1,109 @@
+<%@ page import="com.tms.beans.TrainBean" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Update Train</title>
+	<style>
+	body {
+	font-family: Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+	background-color: #f2f2f2;
+}
+
+.navbar {
+	background-color: #333;
+	padding: 1rem;
+}
+
+.navbar ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	gap: 1rem;
+}
+
+.navbar ul li {
+	display: inline;
+}
+
+.navbar ul li a {
+	color: white;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+.container {
+	padding: 2rem;
+	background-color: white;
+	margin: 2rem auto;
+	width: 60%;
+	border-radius: 8px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-table td {
+	padding: 0.5rem;
+}
+
+input[type="text"], input[type="submit"] {
+	padding: 0.5rem;
+	width: 100%;
+}
+
+.footer {
+	text-align: center;
+	padding: 1rem;
+	background-color: #333;
+	color: white;
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+}
+	</style>
+</head>
+<body>
+
+	<!-- ✅ NAVBAR -->
+	<header class="navbar">
+		<nav>
+			<ul>
+				<li><a href="AdminHome.html">Dashboard</a></li>
+				<li><a href="adminviewtrainfwd">View Trains</a></li>
+				<li><a href="logout">Logout</a></li>
+			</ul>
+		</nav>
+	</header>
+
+	<!-- ✅ MAIN CONTENT -->
+	<main class="container">
+		<h2>Train Schedule Update</h2>
+		<% 
+			TrainBean train = (TrainBean) request.getAttribute("train");
+			if (train != null) {
+		%>
+		<form action="updatetrainschedule" method="post">
+			<table class="form-table">
+				<tr><td>Train No:</td><td><input type="text" name="trainno" value="<%= train.getTr_no() %>" readonly></td></tr>
+				<tr><td>Train Name:</td><td><input type="text" name="trainname" value="<%= train.getTr_name() %>"></td></tr>
+				<tr><td>From Station:</td><td><input type="text" name="fromstation" value="<%= train.getFrom_stn() %>"></td></tr>
+				<tr><td>To Station:</td><td><input type="text" name="tostation" value="<%= train.getTo_stn() %>"></td></tr>
+				<tr><td>Available Seats:</td><td><input type="text" name="available" value="<%= train.getSeats() %>"></td></tr>
+				<tr><td>Fare (INR):</td><td><input type="text" name="fare" value="<%= train.getFare() %>"></td></tr>
+				<tr><td></td><td><input type="submit" value="Update Train Schedule"></td></tr>
+			</table>
+		</form>
+		<% } else { %>
+			<p style="color:red;"><%= request.getAttribute("error") %></p>
+		<% } %>
+	</main>
+
+	<!-- ✅ FOOTER -->
+	<footer class="footer">
+		<p>&copy; 2025 Train Management System. All rights reserved.</p>
+	</footer>
+
+</body>
+</html>

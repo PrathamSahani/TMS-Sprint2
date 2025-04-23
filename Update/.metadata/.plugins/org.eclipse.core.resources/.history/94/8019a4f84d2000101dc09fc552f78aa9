@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Search Train</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            margin-bottom: 20px;
+        }
+        .menu {
+            font-size: 20px;
+        }
+        .tab {
+            margin: 20px;
+        }
+        .blue {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .error-message {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">National Ticket Booking Spot</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="AdminHome.html">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="adminviewtrainfwd">View Trains</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="adminsearchtrainfwd">Search By TrainNo</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="addtrainfwd">Add Train</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="cancletrainfwd">Delete Train</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="updatetrain">Update Train Details</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="adminlogout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Search Form -->
+        <div class="tab">
+            <h3 class="menu">Search Trains</h3>
+            <form action="adminsearchtrain" method="post" class="form-inline">
+                <div class="form-group mb-2">
+                    <label for="trainnumber" class="mr-2">Train Number:</label>
+                    <input type="text" class="form-control" id="trainnumber" name="trainnumber" required>
+                </div>
+                <button type="submit" class="btn btn-primary mb-2 ml-2">Search Train</button>
+            </form>
+        </div>
+
+        <!-- Train Details or Error Message -->
+        <div class="tab">
+            <c:if test="${not empty train}">
+                <h4>Searched Train Details</h4>
+                <table class="table table-bordered">
+                    <tr>
+                        <td class="blue">Train Name:</td>
+                        <td>${train.tr_name}</td>
+                    </tr>
+                    <tr>
+                        <td class="blue">Train Number:</td>
+                        <td>${train.tr_no}</td>
+                    </tr>
+                    <tr>
+                        <td class="blue">From Station:</td>
+                        <td>${train.from_stn}</td>
+                    </tr>
+                    <tr>
+                        <td class="blue">To Station:</td>
+                        <td>${train.to_stn}</td>
+                    </tr>
+                    <tr>
+                        <td class="blue">Available Seats:</td>
+                        <td>${train.seats}</td>
+                    </tr>
+                    <tr>
+                        <td class="blue">Fare (INR):</td>
+                        <td>${train.fare} RS</td>
+                    </tr>
+                </table>
+            </c:if>
+
+            <c:if test="${not empty errorMessage}">
+                <p class="error-message">${errorMessage}</p>
+            </c:if>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <p>&copy; 2025 National Ticket Booking Spot | All Rights Reserved</p>
+    </footer>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
