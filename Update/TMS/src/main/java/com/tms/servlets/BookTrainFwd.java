@@ -31,7 +31,7 @@ public class BookTrainFwd extends HttpServlet {
 		res.setContentType("text/html");
 		TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
 		
-		RequestDispatcher rd = req.getRequestDispatcher("BookTrains.html");
+		RequestDispatcher rd = req.getRequestDispatcher("BookTrains.jsp");
 		rd.forward(req, res);
 
 	}

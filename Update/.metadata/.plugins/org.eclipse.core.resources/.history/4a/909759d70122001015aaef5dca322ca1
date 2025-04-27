@@ -1,0 +1,161 @@
+package com.tms.servlets;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletContext;
+
+import com.tms.beans.HistoryBean;
+import com.tms.beans.TrainBean;
+import com.tms.beans.TrainException;
+import com.tms.constant.ResponseCode;
+import com.tms.constant.UserRole;
+import com.tms.service.BookingService;
+import com.tms.service.TrainService;
+import com.tms.service.impl.BookingServiceImpl;
+import com.tms.service.impl.TrainServiceImpl;
+import com.tms.utils.TrainUtil;
+
+@SuppressWarnings("serial")
+@WebServlet("/booktrains")
+public class BookTrains extends HttpServlet {
+
+    private TrainService trainService = new TrainServiceImpl();
+    private BookingService bookingService = new BookingServiceImpl();
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+        res.setContentType("text/html;charset=UTF-8");
+        PrintWriter pw = res.getWriter();
+
+        // Validate user role
+        TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
+
+        // Include user home header
+        RequestDispatcher rd = req.getRequestDispatcher("UserHome.jsp");
+        rd.include(req, res);
+
+        // Begin Bootstrap container for results
+        pw.println("<div class='container my-5'>");
+
+        ServletContext sct = req.getServletContext();
+        try {
+            int seatsRequested = (int) sct.getAttribute("seats");
+            String trainNo = (String) sct.getAttribute("trainnumber");
+            String journeyDate = (String) sct.getAttribute("journeydate");
+            String seatClass = (String) sct.getAttribute("class");
+            String userMailId = TrainUtil.getCurrentUserEmail(req);
+
+            // Format journey date
+            SimpleDateFormat inputFmt = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat outputFmt = new SimpleDateFormat("dd-MMM-yyyy");
+            java.util.Date utilDate = inputFmt.parse(journeyDate);
+            String formattedDate = outputFmt.format(utilDate);
+
+            TrainBean train = trainService.getTrainById(trainNo);
+            if (train == null) {
+                printAlert(pw, "Invalid Train Number!", "danger");
+            } else {
+                int availableSeats = train.getSeats();
+                if (seatsRequested > availableSeats) {
+                    printAlert(pw, "Only " + availableSeats + " seats are available on this train.", "warning");
+                } else {
+                    // Update seat count
+                    train.setSeats(availableSeats - seatsRequested);
+                    String responseCode = trainService.updateTrain(train);
+
+                    if (ResponseCode.SUCCESS.toString().equalsIgnoreCase(responseCode)) {
+                        // Create booking history
+                        HistoryBean booking = new HistoryBean();
+                        double totalAmount = train.getFare() * seatsRequested;
+                        booking.setAmount(totalAmount);
+                        booking.setFrom_stn(train.getFrom_stn());
+                        booking.setTo_stn(train.getTo_stn());
+                        booking.setTr_no(trainNo);
+                        booking.setSeats(seatsRequested);
+                        booking.setMailId(userMailId);
+                        booking.setDate(formattedDate);
+
+                        HistoryBean transaction = bookingService.createHistory(booking);
+                        printSuccessCard(pw, transaction, train.getTr_name(), seatClass);
+                    } else {
+                        printAlert(pw, "Transaction declined. Please try again.", "danger");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new TrainException(422, this.getClass().getName() + "_FAILED", e.getMessage());
+        } finally {
+            // Clean up context attributes
+            sct.removeAttribute("seats");
+            sct.removeAttribute("trainnumber");
+            sct.removeAttribute("journeydate");
+            sct.removeAttribute("class");
+        }
+
+        pw.println("</div>"); // Close container
+    }
+
+    /** Utility to print Bootstrap alert messages */
+    private void printAlert(PrintWriter pw, String message, String type) {
+        pw.println("<div class='alert alert-" + type + " alert-dismissible fade show' role='alert'>");
+        pw.println("  " + message + "");
+        pw.println("  <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>");
+        pw.println("</div>");
+    }
+
+    /** Utility to print booking success card */
+    private void printSuccessCard(PrintWriter pw, HistoryBean txn, String trainName, String seatClass) {
+        pw.println("<style>");
+        pw.println(".ticket-container { background: url('https://www.transparenttextures.com/patterns/carpet.png'); padding: 20px; border-radius: 10px; max-width: 700px; margin: auto; font-family: 'Segoe UI', sans-serif; }");
+        pw.println(".ticket { background-color: #fff; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); padding: 20px; }");
+        pw.println(".ticket h2 { text-align: center; color: #2c3e50; margin-bottom: 20px; font-weight: bold; }");
+        pw.println(".ticket-table th, .ticket-table td { padding: 8px 12px; }");
+        pw.println(".download-btn { text-align: center; margin-top: 20px; }");
+        pw.println("</style>");
+
+        pw.println("<div class='ticket-container'>");
+        pw.println("  <div class='ticket' id='ticket-content'>");
+        pw.println("    <h2>E-Ticket</h2>");
+        pw.println("    <h5 class='text-center mb-3'>PNR: <span class='text-primary'>" + txn.getTransId() + "</span></h5>");
+        pw.println("    <table class='table table-bordered ticket-table'>");
+        pw.println("      <tbody>");
+        pw.println("        <tr><th>Train Name</th><td>" + trainName + "</td></tr>");
+        pw.println("        <tr><th>Train No</th><td>" + txn.getTr_no() + "</td></tr>");
+        pw.println("        <tr><th>From</th><td>" + txn.getFrom_stn() + "</td></tr>");
+        pw.println("        <tr><th>To</th><td>" + txn.getTo_stn() + "</td></tr>");
+        pw.println("        <tr><th>Date of Journey</th><td>" + txn.getDate() + "</td></tr>");
+        pw.println("        <tr><th>Time</th><td>11:23</td></tr>");
+        pw.println("        <tr><th>Passengers</th><td>" + txn.getSeats() + "</td></tr>");
+        pw.println("        <tr><th>Class</th><td>" + seatClass + "</td></tr>");
+        pw.println("        <tr><th>Amount Paid</th><td>&#8377; " + txn.getAmount() + "</td></tr>");
+        pw.println("      </tbody>");
+        pw.println("    </table>");
+        pw.println("  </div>");
+        pw.println("  <div class='download-btn'>");
+        pw.println("    <button class='btn btn-primary' onclick='downloadTicket()'>Download Ticket</button>");
+        pw.println("  </div>");
+        pw.println("</div>");
+
+        pw.println("<script>");
+        pw.println("function downloadTicket() {");
+        pw.println("  const ticket = document.getElementById('ticket-content').outerHTML;");
+        pw.println("  const blob = new Blob([ticket], { type: 'text/html' });");
+        pw.println("  const url = URL.createObjectURL(blob);");
+        pw.println("  const a = document.createElement('a');");
+        pw.println("  a.href = url;");
+        pw.println("  a.download = 'ticket.html';");
+        pw.println("  a.click();");
+        pw.println("  URL.revokeObjectURL(url);");
+        pw.println("}");
+        pw.println("</script>");
+    }
+}

@@ -1,0 +1,60 @@
+package com.tms.servlets;
+
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import com.tms.beans.TrainBean;
+import com.tms.beans.TrainException;
+import com.tms.constant.UserRole;
+import com.tms.service.TrainService;
+import com.tms.service.impl.TrainServiceImpl;
+import com.tms.utils.TrainUtil;
+
+import java.io.IOException;
+import java.util.List;
+
+@SuppressWarnings("serial")
+@WebServlet("/fareenq")
+public class FareEnq extends HttpServlet {
+    private TrainService trainService = new TrainServiceImpl();
+
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) 
+            throws IOException, ServletException {
+        // enforce login/customer role
+        TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
+
+        try {
+            String fromStation = req.getParameter("fromstation");
+            String toStation   = req.getParameter("tostation");
+
+            List<TrainBean> trains = trainService.getTrainsBetweenStations(fromStation, toStation);
+
+            if (trains != null && !trains.isEmpty()) {
+                // generate random time per train
+                for (TrainBean t : trains) {
+                    int hr  = (int) (Math.random() * 24);
+                    int min = (int) (Math.random() * 60);
+                    String time = String.format("%02d:%02d", hr, min);
+                    t.setTime(time);
+                }
+                req.setAttribute("trains", trains);
+                req.setAttribute("fromStation", fromStation);
+                req.setAttribute("toStation", toStation);
+            } else {
+                req.setAttribute("message", 
+                    "There are no trains between " + fromStation + " and " + toStation);
+            }
+
+            // forward to JSP that now contains all HTML
+            RequestDispatcher rd = req.getRequestDispatcher("Fare.jsp");
+            rd.forward(req, res);
+
+        } catch (Exception e) {
+            throw new TrainException(422, this.getClass().getName() + "_FAILED", e.getMessage());
+        }
+    }
+}

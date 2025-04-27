@@ -1,0 +1,82 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page import="com.tms.beans.TrainBean" %>
+<%
+    TrainBean train = (TrainBean) request.getAttribute("train");
+    String trainNo = (String) request.getAttribute("trainNo");
+%>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Search Train - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">National Ticket Booking Spot</a>
+            <div class="d-flex">
+                <a class="btn btn-light me-2" href="UserLogin.jsp">Login as User</a>
+                <a class="btn btn-light me-2" href="UserRegister.jsp">New User Register</a>
+                <a class="btn btn-light" href="AdminLogin.jsp">Login as Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <nav class="mb-4">
+            <div class="btn-group w-100" role="group">
+                <a href="AdminHome.jsp" class="btn btn-outline-primary">Home</a>
+                <a href="adminviewtrainfwd" class="btn btn-outline-primary">View Trains</a>
+                <a href="adminsearchtrainfwd" class="btn btn-outline-primary">Search By Train No</a>
+                <a href="addtrainfwd" class="btn btn-outline-primary">Add Train</a>
+                <a href="cancletrainfwd" class="btn btn-outline-primary">Delete Train</a>
+                <a href="updatetrain" class="btn btn-outline-primary">Update Train</a>
+                <a href="adminlogout" class="btn btn-outline-danger">Logout</a>
+            </div>
+        </nav>
+
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                Search Trains
+            </div>
+            <div class="card-body">
+                <form action="adminsearchtrain" method="post" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="trainnumber" class="form-label">Train Number</label>
+                        <input type="text" name="trainnumber" id="trainnumber" class="form-control" required>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success w-100">Search Train</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <% if (train != null) { %>
+            <div class="card mt-4">
+                <div class="card-header bg-success text-white">
+                    Searched Train Details
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <tr><th>Train Name</th><td><%= train.getTr_name() %></td></tr>
+                        <tr><th>Train Number</th><td><%= train.getTr_no() %></td></tr>
+                        <tr><th>From Station</th><td><%= train.getFrom_stn() %></td></tr>
+                        <tr><th>To Station</th><td><%= train.getTo_stn() %></td></tr>
+                        <tr><th>Available Seats</th><td><%= train.getSeats() %></td></tr>
+                        <tr><th>Fare (INR)</th><td><%= train.getFare() %> RS</td></tr>
+                    </table>
+                </div>
+            </div>
+        <% } else if (trainNo != null) { %>
+            <div class="alert alert-warning mt-4" role="alert">
+                Train No. <strong><%= trainNo %></strong> is not available!
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

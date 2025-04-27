@@ -37,7 +37,7 @@ public class UserViewLinkget extends HttpServlet {
 			String trainNo = req.getParameter("trainNo");
 			TrainBean train = trainService.getTrainById(trainNo);
 			if (train != null) {
-				RequestDispatcher rd = req.getRequestDispatcher("UserHome.html");
+				RequestDispatcher rd = req.getRequestDispatcher("UserHome.jsp");
 				rd.include(req, res);
 				pw.println("<div class='main'><p1 class='menu'>Selected Train Detail</p1></div>");
 				pw.println("<div class='tab'>" + "<table>" + "<tr><td class='blue'>Train Name :</td><td>"
@@ -48,7 +48,7 @@ public class UserViewLinkget extends HttpServlet {
 						+ train.getSeats() + "</td></tr>" + "<tr><td class='blue'>Fare (INR) :</td><td>"
 						+ train.getFare() + " RS</td></tr>" + "</table>" + "</div>");
 			} else {
-				RequestDispatcher rd = req.getRequestDispatcher("SearchTrains.html");
+				RequestDispatcher rd = req.getRequestDispatcher("SearchTrains.jsp");
 				rd.include(req, res);
 				pw.println("<div class='tab'><p1 class='menu'>Train No." + req.getParameter("trainnumber")
 						+ " is Not Available !</p1></div>");

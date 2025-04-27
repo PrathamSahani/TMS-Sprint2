@@ -1,0 +1,74 @@
+<%@ page import="java.util.List" %>
+<%@ page import="com.tms.beans.TrainBean" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Fare Result — E-Trains</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<jsp:include page="UserHome.jsp" />
+
+<div class="container my-5">
+    <%
+        String fromStation = (String) request.getAttribute("fromStation");
+        String toStation = (String) request.getAttribute("toStation");
+        List<TrainBean> trains = (List<TrainBean>) request.getAttribute("trains");
+    %>
+
+    <% if (trains != null && !trains.isEmpty()) { %>
+        <div class="alert alert-info">
+            <strong>Fare for Trains Between <%= fromStation %> and <%= toStation %>:</strong>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Train Name</th>
+                        <th>Train No</th>
+                        <th>From Stn</th>
+                        <th>To Stn</th>
+                        <th>Time</th>
+                        <th>Seats</th>
+                        <th>Fare (INR)</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <% for (TrainBean train : trains) {
+                       int hr = (int) (Math.random() * 24);
+                       int min = (int) (Math.random() * 60);
+                       String time = (hr < 10 ? "0" + hr : hr) + ":" + (min < 10 ? "0" + min : min);
+                %>
+                    <tr>
+                        <td><%= train.getTr_name() %></td>
+                        <td><%= train.getTr_no() %></td>
+                        <td><%= train.getFrom_stn() %></td>
+                        <td><%= train.getTo_stn() %></td>
+                        <td><%= time %></td>
+                        <td><%= train.getSeats() %></td>
+                        <td><%= train.getFare() %> RS</td>
+                        <td>
+                            <a href="booktrainbyref?trainNo=<%= train.getTr_no() %>&fromStn=<%= train.getFrom_stn() %>&toStn=<%= train.getTo_stn() %>" class="btn btn-danger btn-sm">
+                                Book Now
+                            </a>
+                        </td>
+                    </tr>
+                <% } %>
+                </tbody>
+            </table>
+        </div>
+    <% } else { %>
+        <div class="alert alert-warning text-center">
+            There are no trains between <strong><%= fromStation %></strong> and <strong><%= toStation %></strong>.
+        </div>
+    <% } %>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

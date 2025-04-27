@@ -25,7 +25,7 @@ public class UserAvailFwd extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
 		res.setContentType("text/html");
 		TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
-		RequestDispatcher rd = req.getRequestDispatcher("Availability.html");
+		RequestDispatcher rd = req.getRequestDispatcher("Availability.jsp");
 		rd.forward(req, res);
 
 	}

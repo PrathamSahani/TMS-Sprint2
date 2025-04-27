@@ -33,7 +33,7 @@ public class AdminSearchTrainFwd extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
 		res.setContentType("text/html");
 		TrainUtil.validateUserAuthorization(req, UserRole.ADMIN);
-		RequestDispatcher rd = req.getRequestDispatcher("AdminSearchTrain.html");
+		RequestDispatcher rd = req.getRequestDispatcher("AdminSearchTrain.jsp");
 		rd.forward(req, res);
 
 	}

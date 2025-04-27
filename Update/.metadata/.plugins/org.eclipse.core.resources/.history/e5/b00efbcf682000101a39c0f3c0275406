@@ -1,0 +1,48 @@
+package com.tms.servlets;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+
+import jakarta.servlet.RequestDispatcher;
+
+import com.tms.beans.TrainBean;
+import com.tms.beans.TrainException;
+import com.tms.constant.UserRole;
+import com.tms.service.TrainService;
+import com.tms.service.impl.TrainServiceImpl;
+import com.tms.utils.TrainUtil;
+
+@SuppressWarnings("serial")
+@WebServlet("/fareenq")
+public class FareEnq extends HttpServlet {
+    private TrainService trainService = new TrainServiceImpl();
+
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+        // authorize
+        TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
+
+        try {
+            String fromStation = req.getParameter("fromstation");
+            String toStation   = req.getParameter("tostation");
+
+            // get data
+            List<TrainBean> trains = trainService.getTrainsBetweenStations(fromStation, toStation);
+
+            // push into request
+            req.setAttribute("fromStation", fromStation);
+            req.setAttribute("toStation",   toStation);
+            req.setAttribute("trains",      trains);
+
+            // forward to JSP (which will render either the table or a "no trains" message)
+            RequestDispatcher rd = req.getRequestDispatcher("Fare.jsp");
+            rd.forward(req, res);
+        } catch (Exception e) {
+            throw new TrainException(422, this.getClass().getName() + "_FAILED", e.getMessage());
+        }
+    }
+}

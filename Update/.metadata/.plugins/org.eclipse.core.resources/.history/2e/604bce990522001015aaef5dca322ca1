@@ -1,0 +1,432 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="com.tms.beans.HistoryBean" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>E-Ticket</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --ticket-bg: #fff9e6;
+            --ticket-border: #e0c9a6;
+            --ticket-accent: #d62d1f;
+            --ticket-text: #3a3a3a;
+        }
+        
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes slideIn {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .success-icon {
+            font-size: 5rem;
+            animation: fadeInScale 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: white;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .modal-content {
+            border-radius: 15px;
+            overflow: hidden;
+            animation: slideIn 0.4s ease-out;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: none;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #28a745 0%, #5cb85c 100%);
+            border-bottom: none;
+            padding: 1.5rem;
+        }
+        
+        .modal-title {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .modal-body {
+            padding: 2rem;
+        }
+        
+        .modal-footer {
+            border-top: none;
+            padding: 1.5rem;
+            background: #f8f9fa;
+        }
+        
+        .ticket-container {
+            background: var(--ticket-bg);
+            border: 2px solid var(--ticket-border);
+            border-radius: 12px;
+            max-width: 700px;
+            margin: 30px auto;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInScale 0.6s ease-out;
+        }
+        
+        .ticket-perforation {
+            position: absolute;
+            top: 0;
+            left: 30px;
+            right: 30px;
+            height: 3px;
+            background: repeating-linear-gradient(to right, var(--ticket-accent) 0%, var(--ticket-accent) 50%, transparent 50%, transparent 100%);
+            background-size: 20px 3px;
+            z-index: 2;
+        }
+        
+        .ticket {
+            padding: 30px;
+            position: relative;
+            background: linear-gradient(to bottom, var(--ticket-bg) 0%, #fff 100%);
+        }
+        
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed var(--ticket-border);
+        }
+        
+        .ticket-title {
+            color: var(--ticket-accent);
+            font-weight: 800;
+            font-size: 2rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .ticket-title i {
+            margin-right: 15px;
+            font-size: 2.2rem;
+        }
+        
+        .ticket-pnr {
+            background: #f1e9d9;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            color: var(--ticket-text);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .ticket-body {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .ticket-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 25px 0;
+        }
+        
+        .ticket-table th {
+            background: #e8dfce;
+            text-align: left;
+            padding: 15px;
+            font-weight: 600;
+            color: #5d5d5d;
+            width: 30%;
+            border-radius: 6px 0 0 6px;
+        }
+        
+        .ticket-table td {
+            padding: 15px;
+            background: white;
+            border-radius: 0 6px 6px 0;
+            font-weight: 500;
+            color: var(--ticket-text);
+            box-shadow: 0 2px 3px rgba(0,0,0,0.05);
+        }
+        
+        .ticket-price {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin: 25px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+        
+        .ticket-price-amount {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--ticket-accent);
+            margin-left: 10px;
+        }
+        
+        .ticket-valid {
+            background: #f1e9d9;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            margin-top: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .ticket-watermark {
+            position: absolute;
+            right: 30px;
+            bottom: 30px;
+            opacity: 0.08;
+            font-size: 10rem;
+            z-index: 0;
+            color: var(--ticket-accent);
+        }
+        
+        .ticket-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px dashed var(--ticket-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn-ticket {
+            padding: 10px 25px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-download {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            border: none;
+            color: white;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+            color: white;
+        }
+        
+        .btn-home {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            border: none;
+            color: white;
+            box-shadow: 0 4px 10px rgba(108, 117, 125, 0.3);
+        }
+        
+        .btn-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(108, 117, 125, 0.4);
+            color: white;
+        }
+        
+        .payment-details {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .payment-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #28a745;
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Payment Success Modal -->
+    <div class="modal fade show" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="false" style="display: block; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header text-white">
+                    <h5 class="modal-title" id="paymentModalLabel"><i class="bi bi-credit-card"></i> Payment Confirmation</h5>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="success-icon">
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                    </div>
+                    <h4 class="text-success mb-3">Payment Successful!</h4>
+                    <div class="payment-details">
+                        <p class="mb-2">Amount Paid</p>
+                        <div class="payment-amount">₹ ${txn.amount}</div>
+                        <div class="d-flex justify-content-center align-items-center mt-3">
+                            <i class="bi bi-receipt text-primary me-2" style="font-size: 1.2rem;"></i>
+                            <span>Transaction ID: ${txn.transId}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-primary px-4 py-2" onclick="showTicket()" style="min-width: 200px;">
+                        <i class="bi bi-ticket-perforated me-2"></i>View Your Ticket
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ticket Container (initially hidden) -->
+    <div class='ticket-container' id="ticketDisplay">
+        <div class="ticket-perforation"></div>
+        <div class='ticket' id='ticket-content'>
+            <div class="ticket-header">
+                <h1 class="ticket-title"><i class="bi bi-train-front"></i> Railway E-Ticket</h1>
+                <div class="ticket-pnr">PNR: ${txn.transId}</div>
+            </div>
+            
+            <div class="ticket-body">
+                <table class='ticket-table'>
+                    <tbody>
+                        <tr><th>Train Name</th><td><strong>${trainName}</strong></td></tr>
+                        <tr><th>Train Number</th><td>${txn.tr_no}</td></tr>
+                        <tr><th>From Station</th><td>${txn.from_stn}</td></tr>
+                        <tr><th>To Station</th><td>${txn.to_stn}</td></tr>
+                        <tr><th>Date of Journey</th><td><strong>${txn.date}</strong></td></tr>
+                        <tr><th>Departure Time</th><td>11:23 (Scheduled)</td></tr>
+                        <tr><th>Passengers</th><td>${txn.seats} ${txn.seats > 1 ? 'Persons' : 'Person'}</td></tr>
+                        <tr><th>Class</th><td>${seatClass}</td></tr>
+                    </tbody>
+                </table>
+                
+                <div class="ticket-price">
+                    <i class="bi bi-currency-rupee" style="font-size: 1.5rem;"></i>
+                    <span class="ticket-price-amount">${txn.amount}</span>
+                </div>
+                
+                <div class="ticket-valid">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    Valid for travel on ${txn.date} - Please carry ID proof
+                </div>
+                
+                <div class="ticket-watermark">
+                    <i class="bi bi-ticket-perforated"></i>
+                </div>
+            </div>
+            
+            <div class='ticket-footer'>
+                <button class='btn btn-home btn-ticket' onclick="goToHome()">
+                    <i class="bi bi-house-door me-2"></i>Back to Home
+                </button>
+                <button class='btn btn-download btn-ticket' onclick='downloadPDF()'>
+                    <i class="bi bi-download me-2"></i>Download Ticket
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    // Initialize jsPDF
+    const { jsPDF } = window.jspdf;
+    
+    // Show ticket and hide modal with animation
+    function showTicket() {
+        const modal = document.getElementById('paymentModal');
+        modal.style.opacity = '0';
+        modal.style.transition = 'opacity 0.3s ease';
+        
+        setTimeout(() => {
+            modal.style.display = 'none';
+            const ticket = document.getElementById('ticketDisplay');
+            ticket.style.display = 'block';
+        }, 300);
+    }
+    
+    // Download ticket as PDF
+    function downloadPDF() {
+        const ticketElement = document.getElementById('ticket-content');
+        const downloadBtn = document.querySelector('.btn-download');
+        
+        // Change button text to show loading state
+        const originalText = downloadBtn.innerHTML;
+        downloadBtn.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Generating PDF...';
+        downloadBtn.disabled = true;
+        
+        // Use html2canvas to capture the ticket
+        html2canvas(ticketElement, {
+            scale: 2,
+            logging: false,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#fff9e6'
+        }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgWidth = 190;
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+            
+            // Add background color to PDF
+            pdf.setFillColor(255, 249, 230);
+            pdf.rect(0, 0, 210, 297, 'F');
+            
+            pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+            pdf.save(`Railway_Ticket_${'${txn.transId}'}.pdf`);
+            
+            // Restore button state
+            downloadBtn.innerHTML = originalText;
+            downloadBtn.disabled = false;
+        }).catch(err => {
+            console.error('Error generating PDF:', err);
+            downloadBtn.innerHTML = originalText;
+            downloadBtn.disabled = false;
+            alert('Failed to generate PDF. Please try again.');
+        });
+    }
+    
+    // Redirect to home page
+    function goToHome() {
+        window.location.href = 'UserHome.jsp';
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('paymentModal');
+        if (event.target === modal) {
+            showTicket();
+        }
+    }
+    </script>
+</body>
+</html>

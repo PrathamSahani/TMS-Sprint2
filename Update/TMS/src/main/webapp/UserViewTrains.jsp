@@ -1,0 +1,86 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.*, com.tms.beans.TrainBean" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>View Trains</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">National Ticket Booking Spot</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="userhome">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="userviewtrainfwd">View Trains</a></li>
+          <li class="nav-item"><a class="nav-link" href="trainbwstnfwd">Trains Between Stations</a></li>
+          <li class="nav-item"><a class="nav-link" href="bookingdetails">Booking History</a></li>
+          <li class="nav-item"><a class="nav-link" href="fareenqfwd">Fare Enquiry</a></li>
+          <li class="nav-item"><a class="nav-link" href="useravailfwd">Seat Availability</a></li>
+          <li class="nav-item"><a class="nav-link" href="usersearchtrain">Search By TrainNo</a></li>
+          <li class="nav-item"><a class="nav-link" href="userprofile">Profile</a></li>
+        </ul>
+        <div class="d-flex">
+          <a class="btn btn-light" href="userlogout">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+
+    <div class="container mt-4">
+        <h3 class="text-center text-primary mb-4">Running Trains</h3>
+
+        <%
+            List<TrainBean> trains = (List<TrainBean>) request.getAttribute("trains");
+            if (trains != null && !trains.isEmpty()) {
+        %>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Train Name</th>
+                        <th>Train Number</th>
+                        <th>From Station</th>
+                        <th>To Station</th>
+                        <th>Time</th>
+                        <th>Seats Available</th>
+                        <th>Fare (INR)</th>
+                        <th>Booking</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%
+                        Random rand = new Random();
+                        for (TrainBean train : trains) {
+                            int hr = rand.nextInt(24);
+                            int min = rand.nextInt(60);
+                            String time = String.format("%02d:%02d", hr, min);
+                    %>
+                    <tr>
+                        <td><a href='view?trainNo=<%= train.getTr_no() %>&fromStn=<%= train.getFrom_stn() %>&toStn=<%= train.getTo_stn() %>'><%= train.getTr_name() %></a></td>
+                        <td><%= train.getTr_no() %></td>
+                        <td><%= train.getFrom_stn() %></td>
+                        <td><%= train.getTo_stn() %></td>
+                        <td><%= time %></td>
+                        <td><%= train.getSeats() %></td>
+                        <td><%= train.getFare() %> RS</td>
+                        <td><a class="btn btn-danger btn-sm" href='booktrainbyref?trainNo=<%= train.getTr_no() %>&fromStn=<%= train.getFrom_stn() %>&toStn=<%= train.getTo_stn() %>'>Book Now</a></td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+        <% } else { %>
+            <div class="alert alert-warning text-center">
+                No Running Trains
+            </div>
+        <% } %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

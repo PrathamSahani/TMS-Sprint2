@@ -1,0 +1,60 @@
+package com.tms.servlets;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.servlet.RequestDispatcher;
+
+import com.tms.beans.TrainBean;
+import com.tms.beans.TrainException;
+import com.tms.constant.UserRole;
+import com.tms.service.TrainService;
+import com.tms.service.impl.TrainServiceImpl;
+import com.tms.utils.TrainUtil;
+
+@SuppressWarnings("serial")
+@WebServlet("/trainbwstn")
+public class TrainBwStn extends HttpServlet {
+    private TrainService trainService = new TrainServiceImpl();
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse res)
+            throws IOException, ServletException {
+        res.setContentType("text/html");  // JSP will actually render
+        TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
+
+        try {
+            String fromStation = req.getParameter("fromstation");
+            String toStation   = req.getParameter("tostation");
+
+            List<TrainBean> trains = trainService.getTrainsBetweenStations(fromStation, toStation);
+
+            // preserve random-time logic, but move presentation into JSP
+            List<String> times = new ArrayList<>();
+            if (trains != null) {
+                for (TrainBean train : trains) {
+                    int hr  = (int) (Math.random() * 24);
+                    int min = (int) (Math.random() * 60);
+                    times.add(String.format("%02d:%02d", hr, min));
+                }
+            }
+
+            req.setAttribute("trains", trains);
+            req.setAttribute("times", times);
+            req.setAttribute("fromStation", fromStation);
+            req.setAttribute("toStation", toStation);
+
+            RequestDispatcher rd = req.getRequestDispatcher("TrainBwStn.jsp");
+            rd.forward(req, res);
+
+        } catch (Exception e) {
+            throw new TrainException(422, this.getClass().getName() + "_FAILED", e.getMessage());
+        }
+    }
+}

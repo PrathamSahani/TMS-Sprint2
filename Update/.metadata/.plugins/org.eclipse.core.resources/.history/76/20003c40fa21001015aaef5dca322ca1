@@ -1,0 +1,64 @@
+// UserProfile.java
+package com.tms.servlets;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import jakarta.servlet.RequestDispatcher;
+
+import com.tms.constant.UserRole;
+import com.tms.utils.TrainUtil;
+
+@SuppressWarnings("serial")
+@WebServlet("/userprofile")
+public class UserProfile extends HttpServlet {
+    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+        res.setContentType("text/html");
+        PrintWriter pw = res.getWriter();
+
+        TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
+
+        RequestDispatcher rd = req.getRequestDispatcher("UserHome.jsp");
+        rd.include(req, res);
+
+        String cp = req.getContextPath();
+
+        // content centered vertically ~200px down
+        pw.println("<div class='container' style='margin-top:200px;'>");
+
+        // optional alert
+        String msg = req.getParameter("msg"), type = req.getParameter("msgType");
+        if (msg != null) {
+            pw.println("<div class='alert alert-" + (type!=null?type:"info")
+                     + " text-center' role='alert'>" + msg + "</div>");
+        }
+
+        // action buttons
+        pw.println("  <div class='d-flex justify-content-center mb-4  .align-top'>");
+        pw.println("    <a href='" + cp + "/viewuserprofile' class='btn btn-outline-primary mx-2'>View Profile</a>");
+        pw.println("    <a href='" + cp + "/edituserprofile' class='btn btn-outline-primary mx-2'>Edit Profile</a>");
+        pw.println("    <a href='" + cp + "/changeuserpassword' class='btn btn-outline-primary mx-2'>Change Password</a>");
+        pw.println("  </div>");
+
+        // welcome card
+        pw.println("  <div class='row justify-content-center'>");
+        pw.println("    <div class='col-md-8'>");
+        pw.println("      <div class='card'>");
+        pw.println("        <div class='card-body text-center'>");
+        pw.println("          <h4>Hey " + TrainUtil.getCurrentUserName(req) + ", welcome to NITRTC!</h4>");
+        pw.println("          <p>Here you can edit, view your profile and change your password.</p>");
+        pw.println("          <p>Thanks for being connected with us!</p>");
+        pw.println("        </div>");
+        pw.println("      </div>");
+        pw.println("    </div>");
+        pw.println("  </div>");
+
+        pw.println("</div>");  // container
+
+        pw.println("<footer class='footer bg-light py-3'>");
+        pw.println("  <div class='container text-center'><span class='text-muted'>&copy; 2025 NITRTC. All rights reserved.</span></div>");
+        pw.println("</footer>");
+    }
+}

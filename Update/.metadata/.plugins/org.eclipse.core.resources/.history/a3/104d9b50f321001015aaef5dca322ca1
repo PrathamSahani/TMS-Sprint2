@@ -1,0 +1,34 @@
+package com.tms.servlets;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import com.tms.beans.UserBean;
+import com.tms.constant.UserRole;
+import com.tms.utils.TrainUtil;
+
+@WebServlet("/edituserprofile")
+public class EditUserProfile extends HttpServlet {
+    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+        TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
+        UserBean ub = TrainUtil.getCurrentCustomer(req);
+        req.setAttribute("userBean", ub);
+        req.setAttribute("section", "edit");
+        RequestDispatcher rd = req.getRequestDispatcher("Username.jsp");
+        rd.forward(req, res);
+    }
+}

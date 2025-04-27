@@ -30,11 +30,11 @@ public class UserLogoutServlet extends HttpServlet {
 
 		if (TrainUtil.isLoggedIn(req, UserRole.CUSTOMER)) {
 			TrainUtil.logout(res);
-			RequestDispatcher rd = req.getRequestDispatcher("UserLogin.html");
+			RequestDispatcher rd = req.getRequestDispatcher("UserLogin.jsp");
 			rd.include(req, res);
 			pw.println("<div class='tab'><p1 class='menu'>You have been successfully logged out !</p1></div>");
 		} else {
-			RequestDispatcher rd = req.getRequestDispatcher("UserLogin.html");
+			RequestDispatcher rd = req.getRequestDispatcher("UserLogin.jsp");
 			rd.include(req, res);
 
 			pw.println("<div class='tab'><p1 class='menu'>You are Already Logged Out !</p1></div>");

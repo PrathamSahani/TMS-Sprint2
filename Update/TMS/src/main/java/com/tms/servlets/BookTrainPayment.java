@@ -40,7 +40,7 @@ public class BookTrainPayment extends HttpServlet {
 		sct.setAttribute("trainnumber", trainNo);
 		sct.setAttribute("journeydate", journeyDate);
 		sct.setAttribute("class", seatClass);
-		RequestDispatcher rd = req.getRequestDispatcher("Payment.html");
+		RequestDispatcher rd = req.getRequestDispatcher("Payment.jsp");
 		rd.forward(req, res);
 
 	}

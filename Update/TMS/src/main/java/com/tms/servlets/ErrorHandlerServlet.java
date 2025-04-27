@@ -69,12 +69,12 @@ public class ErrorHandlerServlet extends HttpServlet {
 		System.out.println("=============================");
 
 		if (statusCode == 401) {
-			RequestDispatcher rd = req.getRequestDispatcher("UserLogin.html");
+			RequestDispatcher rd = req.getRequestDispatcher("UserLogin.jsp");
 			rd.include(req, res);
 			pw.println("<div class='tab'><p1 class='menu'>" + errorMessage + "</p1></div>");
 
 		} else {
-			RequestDispatcher rd = req.getRequestDispatcher("error.html");
+			RequestDispatcher rd = req.getRequestDispatcher("error.jsp");
 			rd.include(req, res);
 			pw.println("<div style='margin-top:20%; text-align:center;'>\r\n"
 					+ "	<p class=\"menu\" style='color:red'>" + errorCode + "</p><br>\r\n" + "	<p class=\"menu\">"

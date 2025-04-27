@@ -7,16 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import com.tms.beans.TrainBean;
 import com.tms.beans.TrainException;
 import com.tms.constant.ResponseCode;
@@ -28,46 +18,36 @@ import com.tms.utils.TrainUtil;
 @WebServlet("/adminaddtrain")
 public class AdminAddTrain extends HttpServlet {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
+    private TrainService trainService = new TrainServiceImpl();
 
-	private TrainService trainService = new TrainServiceImpl();
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+        TrainUtil.validateUserAuthorization(req, UserRole.ADMIN);
 
-	/**
-	 * 
-	 * @param req
-	 * @param res
-	 * @throws IOException
-	 * @throws ServletException
-	 */
-	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
-		res.setContentType("text/html");
-		PrintWriter pw = res.getWriter();
-		TrainUtil.validateUserAuthorization(req, UserRole.ADMIN);
-		try {
-			TrainBean train = new TrainBean();
-			train.setTr_no(Long.parseLong(req.getParameter("trainno")));
-			train.setTr_name(req.getParameter("trainname").toUpperCase());
-			train.setFrom_stn(req.getParameter("fromstation").toUpperCase());
-			train.setTo_stn(req.getParameter("tostation").toUpperCase());
-			train.setSeats(Integer.parseInt(req.getParameter("available")));
-			train.setFare(Double.parseDouble(req.getParameter("fare")));
-			String message = trainService.addTrain(train);
-			if (ResponseCode.SUCCESS.toString().equalsIgnoreCase(message)) {
-				RequestDispatcher rd = req.getRequestDispatcher("AddTrains.html");
-				rd.include(req, res);
-				pw.println("<div class='tab'><p1 class='menu'>Train Added Successfully!</p1></div>");
-			} else {
-				RequestDispatcher rd = req.getRequestDispatcher("AddTrains.html");
-				rd.include(req, res);
-				pw.println("<div class='tab'><p1 class='menu'>Error in filling the train Detail</p1></div>");
-			}
-		} catch (Exception e) {
-			throw new TrainException(422, this.getClass().getName() + "_FAILED", e.getMessage());
-		}
+        try {
+            TrainBean train = new TrainBean();
+            train.setTr_no(Long.parseLong(req.getParameter("trainno")));
+            train.setTr_name(req.getParameter("trainname").toUpperCase());
+            train.setFrom_stn(req.getParameter("fromstation").toUpperCase());
+            train.setTo_stn(req.getParameter("tostation").toUpperCase());
+            train.setSeats(Integer.parseInt(req.getParameter("available")));
+            train.setFare(Double.parseDouble(req.getParameter("fare")));
 
-	}
+            String message = trainService.addTrain(train);
 
+            if (ResponseCode.SUCCESS.toString().equalsIgnoreCase(message)) {
+                req.setAttribute("alertType", "success");
+                req.setAttribute("alertMessage", "Train Added Successfully!");
+            } else {
+                req.setAttribute("alertType", "danger");
+                req.setAttribute("alertMessage", "Error in filling the train details.");
+            }
+
+        } catch (Exception e) {
+            req.setAttribute("alertType", "danger");
+            req.setAttribute("alertMessage", "Exception occurred: " + e.getMessage());
+        }
+
+        req.getRequestDispatcher("AddTrains.jsp").forward(req, res);
+    }
 }

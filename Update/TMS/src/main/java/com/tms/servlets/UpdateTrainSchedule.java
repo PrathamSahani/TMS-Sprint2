@@ -45,11 +45,11 @@ public class UpdateTrainSchedule extends HttpServlet {
 
 			String message = trainService.updateTrain(train);
 			if ("SUCCESS".equalsIgnoreCase(message)) {
-				RequestDispatcher rd = req.getRequestDispatcher("AdminUpdateTrain.html");
+				RequestDispatcher rd = req.getRequestDispatcher("AdminUpdateTrain.jsp");
 				rd.include(req, res);
 				pw.println("<div class='tab'><p1 class='menu'>Train Updated Successfully!</p1></div>");
 			} else {
-				RequestDispatcher rd = req.getRequestDispatcher("AdminUpdateTrain.html");
+				RequestDispatcher rd = req.getRequestDispatcher("AdminUpdateTrain.jsp");
 				rd.include(req, res);
 				pw.println("<div class='tab'><p1 class='menu'>Error in filling the train Detail</p1></div>");
 			}

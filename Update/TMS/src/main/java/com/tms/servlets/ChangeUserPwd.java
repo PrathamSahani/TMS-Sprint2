@@ -1,23 +1,13 @@
+// ChangeUserPwd.java (POST)
 package com.tms.servlets;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
-
+import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.io.PrintWriter;
-
-import jakarta.servlet.RequestDispatcher;
-//import javax.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import com.tms.beans.TrainException;
 import com.tms.beans.UserBean;
@@ -29,58 +19,54 @@ import com.tms.utils.TrainUtil;
 @SuppressWarnings("serial")
 @WebServlet("/changeuserpwd")
 public class ChangeUserPwd extends HttpServlet {
-	private UserService userService = new UserServiceImpl(UserRole.CUSTOMER);
+    private UserService userService = new UserServiceImpl(UserRole.CUSTOMER);
 
-	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
-		res.setContentType("text/html");
-		PrintWriter pw = res.getWriter();
-		UserBean currentUser = TrainUtil.getCurrentCustomer(req);
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+        res.setContentType("text/html");
+        UserBean currentUser = TrainUtil.getCurrentCustomer(req);
+        String cp = req.getContextPath();
 
-		try {
-			String u_Name = req.getParameter("username");
-			String oldPWord = (String) req.getParameter("oldpassword");
-			String newPWord = req.getParameter("newpassword");
-			if (currentUser.getMailId().equals(u_Name)) {
-				if (currentUser.getPWord().equals(oldPWord)) {
-					currentUser.setPWord(newPWord);
-					String message = userService.updateUser(currentUser);
-					if ("SUCCESS".equalsIgnoreCase(message)) {
-						RequestDispatcher rd = req.getRequestDispatcher("UserLogin.html");
-						rd.include(req, res);
-						TrainUtil.logout(res);
-						pw.println(
-								"<div class='tab'>Your Username and Password has Been Updated Successfully<br/>Please Login Again !</div>");
-					} else {
-						RequestDispatcher rd = req.getRequestDispatcher("UserHome.html");
-						rd.include(req, res);
-						pw.println("<div class='tab'>" + "		<p1 class='menu'>" + "	Hello " + currentUser.getFName()
-								+ " ! Welcome to our new NITRTC Website" + "		</p1>" + "	</div>");
-						pw.println("<div class='main'><p1 class='menu'><a href='viewuserprofile'>View Profile</a></p1>&nbsp;"
-								+ "<p1 class='menu'><a href='edituserprofile'>Edit Profile</a></p1>&nbsp;"
-								+ "<p1 class='menu'><a href='changeuserpassword'>Change Password</a></p1>" + "</div>");
-						pw.println("<div class='tab'>Invalid Username and Old Password !</div>");
-					}
-				} else {
-					RequestDispatcher rd = req.getRequestDispatcher("UserHome.html");
-					rd.include(req, res);
-					pw.println("<div class='main'><p1 class='menu'><a href='viewuserprofile'>view Profile</a></p1>"
-							+ "<p1 class='menu'><a href='edituserprofile'>Edit Profile</a></p1>"
-							+ "<p1 class='menu'><a href='changeuserpassword'>Change Password</a></p1>" + "</div>");
-					pw.println("<div class='tab'>Wrong Old PassWord!</div>");
-				}
-			} else {
-				RequestDispatcher rd = req.getRequestDispatcher("UserHome.html");
-				rd.include(req, res);
-				pw.println("<div class='main'><p1 class='menu'><a href='viewuserprofile'>view Profile</a></p1>"
-						+ "<p1 class='menu'><a href='edituserprofile'>Edit Profile</a></p1>"
-						+ "<p1 class='menu'><a href='changeuserpassword'>Change Password</a></p1>" + "</div>");
-				pw.println("<div class='tab'>Invalid UserName</div>");
-			}
+        try {
+            String u_Name = req.getParameter("username");
+            String oldPW  = req.getParameter("oldpassword");
+            String newPW  = req.getParameter("newpassword");
 
-		} catch (Exception e) {
-			throw new TrainException(422, this.getClass().getName() + "_FAILED", e.getMessage());
-		}
+            if (!currentUser.getMailId().equals(u_Name)) {
+                String err = URLEncoder.encode("Invalid username!", StandardCharsets.UTF_8);
+                res.sendRedirect(cp + "/changeuserpassword?msg=" + err + "&msgType=danger");
+                return;
+            }
+            if (!currentUser.getPWord().equals(oldPW)) {
+                String err = URLEncoder.encode("Wrong old password!", StandardCharsets.UTF_8);
+                res.sendRedirect(cp + "/changeuserpassword?msg=" + err + "&msgType=danger");
+                return;
+            }
 
-	}
+            // update
+            currentUser.setPWord(newPW);
+            String outcome = userService.updateUser(currentUser);
+            if ("SUCCESS".equalsIgnoreCase(outcome)) {
+                // clear session & show standalone success
+                TrainUtil.logout(res);
+                PrintWriter pw = res.getWriter();
+                pw.println("<!DOCTYPE html><html><head>");
+                pw.println("<meta charset='UTF-8'><title>Password Changed</title>");
+                pw.println("<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>");
+                pw.println("</head><body>");
+                pw.println("<div class='container d-flex justify-content-center align-items-center' style='min-height:70vh;'>");
+                pw.println("  <div class='alert alert-success text-center w-100' role='alert'>");
+                pw.println("    Your password has been changed successfully.<br>");
+                pw.println("    <a href='" + cp + "/UserLogin.jsp' class='alert-link'>Click here to log in</a>.");
+                pw.println("  </div>");
+                pw.println("</div>");
+                pw.println("</body></html>");
+            } else {
+                String err = URLEncoder.encode("Failed to update password. Try again.", StandardCharsets.UTF_8);
+                res.sendRedirect(cp + "/changeuserpassword?msg=" + err + "&msgType=danger");
+            }
 
+        } catch (Exception e) {
+            throw new TrainException(422, this.getClass().getName() + "_FAILED", e.getMessage());
+        }
+    }
 }

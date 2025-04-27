@@ -1,0 +1,49 @@
+package com.tms.servlets;
+
+import com.tms.beans.TrainBean;
+import com.tms.constant.UserRole;
+import com.tms.exception.TrainException;
+import com.tms.service.TrainService;
+import com.tms.service.impl.TrainServiceImpl;
+import com.tms.utils.TrainUtil;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.util.List;
+
+@WebServlet("/trainbwstn")
+public class TrainBwStn extends HttpServlet {
+    private TrainService trainService = new TrainServiceImpl();
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+        // ensure user is a CUSTOMER
+        TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
+
+        try {
+            String from = req.getParameter("fromstation");
+            String to   = req.getParameter("tostation");
+            List<TrainBean> trains = trainService.getTrainsBetweenStations(from, to);
+
+            // put trains (could be empty) into request
+            req.setAttribute("trains", trains);
+            req.setAttribute("fromStation", from);
+            req.setAttribute("toStation", to);
+
+            // forward to JSP that renders form + table
+            RequestDispatcher rd = req.getRequestDispatcher("TrainBwStn.jsp");
+            rd.forward(req, res);
+
+        } catch (Exception e) {
+            throw new TrainException(422,
+                    this.getClass().getName() + "_FAILED",
+                    e.getMessage());
+        }
+    }
+}

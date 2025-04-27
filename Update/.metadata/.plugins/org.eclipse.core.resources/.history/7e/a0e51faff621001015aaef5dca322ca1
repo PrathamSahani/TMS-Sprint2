@@ -1,0 +1,95 @@
+// ChangeUserPwd.java
+package com.tms.servlets;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import jakarta.servlet.RequestDispatcher;
+
+import com.tms.beans.TrainException;
+import com.tms.beans.UserBean;
+import com.tms.constant.UserRole;
+import com.tms.service.UserService;
+import com.tms.service.impl.UserServiceImpl;
+import com.tms.utils.TrainUtil;
+
+@SuppressWarnings("serial")
+@WebServlet("/changeuserpwd")
+public class ChangeUserPwd extends HttpServlet {
+    private UserService userService = new UserServiceImpl(UserRole.CUSTOMER);
+
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+        res.setContentType("text/html");
+        PrintWriter pw = res.getWriter();
+        UserBean currentUser = TrainUtil.getCurrentCustomer(req);
+
+        try {
+            String u_Name    = req.getParameter("username");
+            String oldPWord  = req.getParameter("oldpassword");
+            String newPWord  = req.getParameter("newpassword");
+
+            if (currentUser.getMailId().equals(u_Name)) {
+                if (currentUser.getPWord().equals(oldPWord)) {
+                    // user authenticated, update password
+                    currentUser.setPWord(newPWord);
+                    String message = userService.updateUser(currentUser);
+
+                    if ("SUCCESS".equalsIgnoreCase(message)) {
+                        // on success, forward to login and force logout
+                        RequestDispatcher rd = req.getRequestDispatcher("UserLogin.jsp");
+                        rd.include(req, res);
+                        TrainUtil.logout(res);
+
+                        pw.println("<div class='container my-5'>");
+                        pw.println("  <div class='alert alert-success text-center' role='alert'>");
+                        pw.println("    Your username and password have been updated successfully.<br>Please log in again!");
+                        pw.println("  </div>");
+                        pw.println("</div>");
+                    } else {
+                        // update failed
+                        RequestDispatcher rd = req.getRequestDispatcher("UserHome.jsp");
+                        rd.include(req, res);
+
+                        pw.println("<div class='container my-5'>");
+                        pw.println("  <div class='alert alert-danger text-center' role='alert'>");
+                        pw.println("    Invalid username or old password!");
+                        pw.println("  </div>");
+                        pw.println("</div>");
+                    }
+                } else {
+                    // old password mismatch
+                    RequestDispatcher rd = req.getRequestDispatcher("UserHome.jsp");
+                    rd.include(req, res);
+
+                    pw.println("<div class='container my-5'>");
+                    pw.println("  <div class='alert alert-danger text-center' role='alert'>");
+                    pw.println("    Wrong old password!");
+                    pw.println("  </div>");
+                    pw.println("</div>");
+                }
+            } else {
+                // username mismatch
+                RequestDispatcher rd = req.getRequestDispatcher("UserHome.jsp");
+                rd.include(req, res);
+
+                pw.println("<div class='container my-5'>");
+                pw.println("  <div class='alert alert-danger text-center' role='alert'>");
+                pw.println("    Invalid username!");
+                pw.println("  </div>");
+                pw.println("</div>");
+            }
+
+            // common footer
+            pw.println("<footer class='footer bg-light py-3'>");
+            pw.println("  <div class='container text-center'><span class='text-muted'>&copy; 2025 NITRTC. All rights reserved.</span></div>");
+            pw.println("</footer>");
+
+        } catch (Exception e) {
+            throw new TrainException(422, this.getClass().getName() + "_FAILED", e.getMessage());
+        }
+    }
+}

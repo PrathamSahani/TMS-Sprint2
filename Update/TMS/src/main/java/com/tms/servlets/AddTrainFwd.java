@@ -33,7 +33,7 @@ public class AddTrainFwd extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
 		res.setContentType("text/html");
 		TrainUtil.validateUserAuthorization(req, UserRole.ADMIN);
-		RequestDispatcher rd = req.getRequestDispatcher("AddTrains.html");
+		RequestDispatcher rd = req.getRequestDispatcher("AddTrains.jsp");
 		rd.forward(req, res);
 
 	}

@@ -29,7 +29,7 @@ public class AdminTrainUpdateFwd extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
 		res.setContentType("text/html");
 
-		RequestDispatcher rd = req.getRequestDispatcher("AdminUpdateTrain.html");
+		RequestDispatcher rd = req.getRequestDispatcher("AdminUpdateTrain.jsp");
 		rd.forward(req, res);
 
 	}

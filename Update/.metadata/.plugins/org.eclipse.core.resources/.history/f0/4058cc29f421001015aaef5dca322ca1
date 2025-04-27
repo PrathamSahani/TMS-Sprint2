@@ -1,0 +1,57 @@
+package com.tms.servlets;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import jakarta.servlet.RequestDispatcher;
+//import javax.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import com.tms.beans.TrainException;
+import com.tms.beans.UserBean;
+import com.tms.constant.UserRole;
+import com.tms.service.UserService;
+import com.tms.service.impl.UserServiceImpl;
+import com.tms.utils.TrainUtil;
+
+@WebServlet("/changeuserpwd")
+public class ChangeUserPwd extends HttpServlet {
+	private UserService userService = new UserServiceImpl(UserRole.CUSTOMER);
+
+	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+		UserBean currentUser = TrainUtil.getCurrentCustomer(req);
+		String u_Name = req.getParameter("username");
+		String oldPWord = req.getParameter("oldpassword");
+		String newPWord = req.getParameter("newpassword");
+
+		if (currentUser.getMailId().equals(u_Name)) {
+			if (currentUser.getPWord().equals(oldPWord)) {
+				currentUser.setPWord(newPWord);
+				String message = userService.updateUser(currentUser);
+				if ("SUCCESS".equalsIgnoreCase(message)) {
+					TrainUtil.logout(res);
+					req.setAttribute("msg", "Password Updated. Please Login Again.");
+					req.getRequestDispatcher("UserLogin.jsp").forward(req, res);
+					return;
+				}
+			}
+		}
+
+		req.setAttribute("user", currentUser);
+		req.setAttribute("error", "Invalid credentials or update failed.");
+		req.setAttribute("action", "change");
+		req.getRequestDispatcher("Username.jsp").forward(req, res);
+	}
+}

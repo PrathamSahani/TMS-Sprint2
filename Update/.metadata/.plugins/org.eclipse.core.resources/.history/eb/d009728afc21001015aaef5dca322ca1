@@ -1,0 +1,30 @@
+// UserProfile.java
+package com.tms.servlets;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+import java.io.IOException;
+
+import com.tms.constant.UserRole;
+import com.tms.utils.TrainUtil;
+
+@WebServlet("/userprofile")
+public class UserProfile extends HttpServlet {
+    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+        TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
+
+        // Get current user's name and message (if any)
+        String userName = TrainUtil.getCurrentUserName(req);
+        String msg = req.getParameter("msg");
+        String msgType = req.getParameter("msgType");
+
+        // Set attributes to be used in JSP
+        req.setAttribute("userName", userName);
+        req.setAttribute("msg", msg);
+        req.setAttribute("msgType", msgType);
+
+        // Forward to JSP for rendering
+        req.getRequestDispatcher("UserProfile.jsp").forward(req, res);
+    }
+}

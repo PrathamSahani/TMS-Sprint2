@@ -27,7 +27,7 @@ public class FareEnqFwd extends HttpServlet {
 
 		TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
 
-		RequestDispatcher rd = req.getRequestDispatcher("Fare.html");
+		RequestDispatcher rd = req.getRequestDispatcher("Fare.jsp");
 		rd.forward(req, res);
 
 	}

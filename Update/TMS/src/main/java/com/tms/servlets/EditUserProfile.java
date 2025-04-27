@@ -1,21 +1,12 @@
+// EditUserProfile.java
 package com.tms.servlets;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
+import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 import com.tms.beans.UserBean;
 import com.tms.constant.UserRole;
@@ -24,31 +15,61 @@ import com.tms.utils.TrainUtil;
 @SuppressWarnings("serial")
 @WebServlet("/edituserprofile")
 public class EditUserProfile extends HttpServlet {
-	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
-		res.setContentType("text/html");
-		PrintWriter pw = res.getWriter();
-		TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
+    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+        res.setContentType("text/html");
+        PrintWriter pw = res.getWriter();
+        TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
 
-		UserBean ub = TrainUtil.getCurrentCustomer(req);
-		RequestDispatcher rd = req.getRequestDispatcher("UserHome.html");
-		rd.include(req, res);
-		pw.println("<div class='tab'>" + "		<p1 class='menu'>" + "	Hello " + TrainUtil.getCurrentUserName(req)
-				+ " ! Welcome to our new NITRTC Website" + "		</p1>" + "	</div>");
-		pw.println("<div class='main'><p1 class='menu'><a href='viewuserprofile'>View Profile</a></p1>&nbsp;"
-				+ "<p1 class='menu'><a href='edituserprofile'>Edit Profile</a></p1>&nbsp;"
-				+ "<p1 class='menu'><a href='changeuserpassword'>Change Password</a></p1>" + "</div>");
-		pw.println("<div class='tab'>Profile Update</div>");
-		pw.println("<div class='tab'>" + "<table><form action='updateuserprofile' method='post'>"
-				+ "<tr><td>User Name :</td><td><input type='text' name='username' value='" + ub.getMailId()
-				+ "' disabled></td></tr>" + "<tr><td>First Name :</td><td><input type='text' name='firstname' value='"
-				+ ub.getFName() + "'></td></tr>"
-				+ "<tr><td>Last Name :</td><td><input type='text' name='lastname' value='" + ub.getLName()
-				+ "'></td></tr>" + "<tr><td>Address :</td><td><input type='text' name='address' value='" + ub.getAddr()
-				+ "'></td></tr>" + "<tr><td>Phone No:</td><td><input type='text' name='phone' value='" + ub.getPhNo()
-				+ "'></td></tr>" + "<tr><td><input type='hidden' name='mail' value='" + ub.getMailId() + "'></td></tr>"
-				+ "<tr><td></td><td><input type='submit' name='submit' value='Update Profile'></td></tr>"
-				+ "</form></table>" + "</div>");
+        UserBean ub = TrainUtil.getCurrentCustomer(req);
+        RequestDispatcher rd = req.getRequestDispatcher("UserHome.jsp");
+        rd.include(req, res);
 
-	}
+        String cp = req.getContextPath();
 
+        // center both vertically & horizontally
+        pw.println("<div class='container d-flex flex-column justify-content-center align-items-center' style='min-height:70vh;'>");
+
+        // form card
+        pw.println("  <div class='row justify-content-center w-100'>");
+        pw.println("    <div class='col-md-6'>");
+        
+        // Display success/error message if present
+        String message = req.getParameter("message");
+        String messageType = req.getParameter("messageType");
+        if (message != null && !message.isEmpty()) {
+            String alertClass = "success".equals(messageType) ? "alert-success" : "alert-danger";
+            pw.println("<div class='alert " + alertClass + " alert-dismissible fade show' role='alert'>");
+            pw.println(message);
+            pw.println("<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>");
+            pw.println("</div>");
+        }
+        
+        pw.println("      <div class='card shadow-sm'>");
+        pw.println("        <div class='card-header text-center'><h4>Update Profile</h4></div>");
+        pw.println("        <div class='card-body'>");
+        pw.println("          <form action='" + cp + "/updateuserprofile' method='post'>");
+        pw.println("            <div class='mb-3 row'><label class='col-sm-4 col-form-label'>User Name:</label><div class='col-sm-8'><input type='text' class='form-control' value='"
+                 + ub.getMailId() + "' disabled></div></div>");
+        pw.println("            <div class='mb-3 row'><label class='col-sm-4 col-form-label'>First Name:</label><div class='col-sm-8'><input type='text' name='firstname' class='form-control' value='"
+                 + ub.getFName() + "'></div></div>");
+        pw.println("            <div class='mb-3 row'><label class='col-sm-4 col-form-label'>Last Name:</label><div class='col-sm-8'><input type='text' name='lastname' class='form-control' value='"
+                 + ub.getLName() + "'></div></div>");
+        pw.println("            <div class='mb-3 row'><label class='col-sm-4 col-form-label'>Address:</label><div class='col-sm-8'><input type='text' name='address' class='form-control' value='"
+                 + ub.getAddr() + "'></div></div>");
+        pw.println("            <div class='mb-3 row'><label class='col-sm-4 col-form-label'>Phone No:</label><div class='col-sm-8'><input type='text' name='phone' class='form-control' value='"
+                 + ub.getPhNo() + "'></div></div>");
+        pw.println("            <input type='hidden' name='mail' value='" + ub.getMailId() + "'/>");
+        pw.println("            <div class='text-center'><button type='submit' class='btn btn-primary'>Update Profile</button></div>");
+        pw.println("          </form>");
+        pw.println("        </div>");
+        pw.println("      </div>");
+        pw.println("    </div>");
+        pw.println("  </div>");
+
+        pw.println("</div>");  // flex container
+
+        pw.println("<footer class='footer bg-light py-3'>");
+        pw.println("  <div class='container text-center'><span class='text-muted'>&copy; 2025 NITRTC. All rights reserved.</span></div>");
+        pw.println("</footer>");
+    }
 }

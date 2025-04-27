@@ -36,7 +36,7 @@ public class AdminCancleTrainFwd extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
 		res.setContentType("text/html");
 		TrainUtil.validateUserAuthorization(req, UserRole.ADMIN);
-		RequestDispatcher rd = req.getRequestDispatcher("CancleTrain.html");
+		RequestDispatcher rd = req.getRequestDispatcher("CancleTrain.jsp");
 		rd.forward(req, res);
 
 	}

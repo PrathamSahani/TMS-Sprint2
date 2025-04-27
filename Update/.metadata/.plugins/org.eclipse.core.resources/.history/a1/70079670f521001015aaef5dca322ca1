@@ -1,0 +1,81 @@
+package com.tms.servlets;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import jakarta.servlet.RequestDispatcher;
+//import javax.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import com.tms.beans.TrainException;
+import com.tms.beans.UserBean;
+import com.tms.constant.UserRole;
+import com.tms.service.UserService;
+import com.tms.service.impl.UserServiceImpl;
+import com.tms.utils.TrainUtil;
+
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+import java.io.IOException;
+import com.tms.beans.UserBean;
+import com.tms.beans.TrainException;
+import com.tms.constant.UserRole;
+import com.tms.service.UserService;
+import com.tms.service.impl.UserServiceImpl;
+import com.tms.utils.TrainUtil;
+
+@SuppressWarnings("serial")
+@WebServlet("/changeuserpwd")
+public class ChangeUserPwd extends HttpServlet {
+    private UserService userService = new UserServiceImpl(UserRole.CUSTOMER);
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+        TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
+        UserBean currentUser = TrainUtil.getCurrentCustomer(req);
+
+        String oldP = req.getParameter("oldpassword");
+        String newP = req.getParameter("newpassword");
+
+        try {
+            if (!currentUser.getPWord().equals(oldP)) {
+                // wrong old password → redisplay modal with error
+                req.setAttribute("errorMessage", "Wrong old password!");
+                req.setAttribute("action", "change");
+                req.getRequestDispatcher("Username.jsp").forward(req, res);
+                return;
+            }
+            // update
+            currentUser.setPWord(newP);
+            String result = userService.updateUser(currentUser);
+            if ("SUCCESS".equalsIgnoreCase(result)) {
+                // logout & send to login page
+                TrainUtil.logout(res);
+                // include a small message in login JSP
+                req.setAttribute("successMessage", "Password changed. Please log in again.");
+                req.getRequestDispatcher("UserLogin.jsp").include(req, res);
+            } else {
+                req.setAttribute("errorMessage", "Unable to update password. Try again later.");
+                req.setAttribute("action", "change");
+                req.getRequestDispatcher("Username.jsp").forward(req, res);
+            }
+
+        } catch (Exception e) {
+            throw new TrainException(422, this.getClass().getName() + "_FAILED", e.getMessage());
+        }
+    }
+}

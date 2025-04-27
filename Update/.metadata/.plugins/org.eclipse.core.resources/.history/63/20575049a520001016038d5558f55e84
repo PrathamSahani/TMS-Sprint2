@@ -1,0 +1,106 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Trains Between Stations - NITRTC</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Navbar (Bootstrap, dark-primary) -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="userhome">National Ticket Booking Spot</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="userhome">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="userviewtrainfwd">View Trains</a></li>
+          <li class="nav-item"><a class="nav-link active" aria-current="page" href="trainbwstnfwd">Between Stations</a></li>
+          <li class="nav-item"><a class="nav-link" href="bookingdetails">History</a></li>
+          <li class="nav-item"><a class="nav-link" href="fareenqfwd">Fare Enquiry</a></li>
+          <li class="nav-item"><a class="nav-link" href="useravailfwd">Seat Availability</a></li>
+          <li class="nav-item"><a class="nav-link" href="usersearchtrain">Search By No.</a></li>
+          <li class="nav-item"><a class="nav-link" href="userprofile">Profile</a></li>
+        </ul>
+        <div class="d-flex">
+          <a class="btn btn-light" href="userlogout">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-4">
+    <!-- Search Form Card -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Find Trains Between Stations</h5>
+        <form action="trainbwstn" method="post" class="row g-3">
+          <div class="col-md-5">
+            <label for="fromstation" class="form-label">From Station</label>
+            <input type="text" class="form-control" id="fromstation" name="fromstation" required>
+          </div>
+          <div class="col-md-5">
+            <label for="tostation" class="form-label">To Station</label>
+            <input type="text" class="form-control" id="tostation" name="tostation" required>
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Search</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Results Table -->
+    <c:if test="${not empty trains}">
+      <div class="mt-4">
+        <h6>Showing trains from <strong>${fromStation}</strong> to <strong>${toStation}</strong>:</h6>
+        <table class="table table-striped table-hover mt-3">
+          <thead class="table-secondary">
+            <tr>
+              <th>Train Name</th>
+              <th>No.</th>
+              <th>From</th>
+              <th>To</th>
+              <th>Time</th>
+              <th>Seats</th>
+              <th>Fare (₹)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <c:forEach var="train" items="${trains}" varStatus="status">
+              <tr>
+                <td>${train.tr_name}</td>
+                <td>${train.tr_no}</td>
+                <td>${train.from_stn}</td>
+                <td>${train.to_stn}</td>
+                <td>${times[status.index]}</td>
+                <td>${train.seats}</td>
+                <td>${train.fare}</td>
+                <td>
+                  <a class="btn btn-success btn-sm"
+                     href="booktrainbyref?trainNo=${train.tr_no}&fromStn=${train.from_stn}&toStn=${train.to_stn}">
+                    Book Now
+                  </a>
+                </td>
+              </tr>
+            </c:forEach>
+          </tbody>
+        </table>
+      </div>
+    </c:if>
+
+    <!-- No Results Alert -->
+    <c:if test="${empty trains && not empty fromStation}">
+      <div class="alert alert-warning mt-4">
+        No trains found between <strong>${fromStation}</strong> and <strong>${toStation}</strong>.
+      </div>
+    </c:if>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!doctype html>
+<html>
+<head>
+    <meta charset="ISO-8859-1">
+    <title>Secure Payment | National Ticket Booking Spot</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        .payment-container {
+            animation: fadeInUp 0.6s ease-out;
+            margin-top: 2rem;
+            margin-bottom: 4rem;
+        }
+        
+        .payment-card {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .payment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            padding: 1.5rem;
+            border-bottom: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+        }
+        
+        .card-title {
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-subtitle {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .payment-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 1rem;
+        }
+        
+        .payment-icon {
+            width: 50px;
+            height: 32px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            transition: transform 0.3s ease;
+        }
+        
+        .payment-icon:hover {
+            transform: scale(1.1);
+        }
+        
+        .card-body {
+            padding: 2rem;
+            background-color: #f8f9fa;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-label i {
+            margin-right: 8px;
+            color: #6c757d;
+        }
+        
+        .form-control {
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            transition: all 0.3s ease;
+            box-shadow: none;
+        }
+        
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+        }
+        
+        .card-footer {
+            background-color: white;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .btn-pay {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            border: none;
+            padding: 12px 24px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+            transition: all 0.3s ease;
+            width: 100%;
+            animation: pulse 2s infinite;
+        }
+        
+        .btn-pay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+        }
+        
+        .secure-payment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1rem;
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        
+        .secure-payment i {
+            color: #28a745;
+            margin-right: 6px;
+            font-size: 1.1rem;
+        }
+        
+        .card-number-group {
+            position: relative;
+        }
+        
+        .card-type-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .payment-card {
+                margin-top: 1rem;
+            }
+            
+            .card-body {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar remains unchanged -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">National Ticket Booking Spot</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="userhome">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="userviewtrainfwd">View Trains</a></li>
+          <li class="nav-item"><a class="nav-link" href="trainbwstnfwd">Trains Between Stations</a></li>
+          <li class="nav-item"><a class="nav-link" href="bookingdetails">Booking History</a></li>
+          <li class="nav-item"><a class="nav-link" href="fareenqfwd">Fare Enquiry</a></li>
+          <li class="nav-item"><a class="nav-link" href="useravailfwd">Seat Availability</a></li>
+          <li class="nav-item"><a class="nav-link" href="usersearchtrain">Search By TrainNo</a></li>
+          <li class="nav-item"><a class="nav-link" href="userprofile">Profile</a></li>
+        </ul>
+        <div class="d-flex">
+          <a class="btn btn-light" href="userlogout">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+<!-- Enhanced Payment Form -->
+<div class="container payment-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card payment-card">
+                <div class="card-header text-white">
+                    <h3 class="card-title"><i class="bi bi-credit-card"></i> Secure Payment Gateway</h3>
+                    <p class="card-subtitle">Complete your booking with a secure payment</p>
+                    <div class="payment-icons">
+                        <img class="payment-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/visa/visa-original.svg" alt="Visa">
+                        <img class="payment-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mastercard/mastercard-original.svg" alt="Mastercard">
+                        <img class="payment-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apple/apple-original.svg" alt="Apple Pay">
+                        <img class="payment-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google Pay">
+                    </div>
+                </div>
+                <form action="booktrains" method="post">
+                    <div class="card-body">
+                        <div class="mb-4 card-number-group">
+                            <label class="form-label"><i class="bi bi-credit-card-2-front"></i> Card Number</label>
+                            <input type="tel" class="form-control" placeholder="1234 5678 9012 3456" required pattern="[0-9\s]{13,19}" maxlength="19">
+                            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/visa/visa-original.svg" class="card-type-icon" id="cardTypeIcon">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label"><i class="bi bi-calendar-date"></i> Expiration Date</label>
+                                <input type="text" class="form-control" placeholder="MM/YY" required pattern="(0[1-9]|1[0-2])\/?([0-9]{2})">
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label"><i class="bi bi-shield-lock"></i> Security Code</label>
+                                <input type="text" class="form-control" placeholder="CVC" required pattern="\d{3,4}">
+                                <small class="text-muted">3 or 4 digits on back of card</small>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label"><i class="bi bi-person-badge"></i> Cardholder Name</label>
+                            <input type="text" class="form-control" placeholder="Name on card" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><i class="bi bi-currency-rupee"></i> Amount to Pay</label>
+                            <input type="text" class="form-control bg-light" value="₹ ${amount}" readonly>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-pay">
+                            <i class="bi bi-lock-fill"></i> Pay Now
+                        </button>
+                        <div class="secure-payment">
+                            <i class="bi bi-shield-check"></i>
+                            <span>Secure 256-bit SSL encrypted payment</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Simple card type detection
+    document.querySelector('[placeholder="1234 5678 9012 3456"]').addEventListener('input', function(e) {
+        const cardIcon = document.getElementById('cardTypeIcon');
+        const value = e.target.value.replace(/\s/g, '');
+        
+        if (/^4/.test(value)) {
+            cardIcon.src = "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/visa/visa-original.svg";
+            cardIcon.style.opacity = "1";
+        } else if (/^5[1-5]/.test(value)) {
+            cardIcon.src = "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mastercard/mastercard-original.svg";
+            cardIcon.style.opacity = "1";
+        } else {
+            cardIcon.style.opacity = "0";
+        }
+        
+        // Add spaces after every 4 digits
+        if (value.length > 0) {
+            e.target.value = value.match(/.{1,4}/g).join(' ');
+        }
+    });
+</script>
+</body>
+</html>

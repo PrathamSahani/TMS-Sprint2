@@ -1,0 +1,91 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>User Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ✅ Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">National Ticket Booking Spot</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
+                data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" 
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="UserLogin.jsp">Login as User</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="UserRegister.jsp">New User Register</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="AdminLogin.jsp">Login as Admin</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- 📝 Registration Form Section -->
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-lg rounded">
+                <div class="card-header bg-success text-white text-center">
+                    <h4>New User Registration</h4>
+                </div>
+                <div class="card-body">
+                    <form action="userreg" method="post" >
+                        <div class="mb-3">
+                            <label for="mailid" class="form-label">Email Id</label>
+                            <input type="email" class="form-control" id="mailid" name="mailid" placeholder="Enter your email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="pword" name="pword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="firstname" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstname" name="firstname" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastname" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastname" name="lastname" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address</label>
+                            <input type="text" class="form-control" id="address" name="address" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phoneno" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phoneno" name="phoneno" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userphoto" class="form-label">Upload Photo</label>
+                            <input type="file" class="form-control" id="userphoto" name="userphoto">
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                I AGREE FOR ALL TERMS & CONDITIONS! REGISTER ME
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Bootstrap Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

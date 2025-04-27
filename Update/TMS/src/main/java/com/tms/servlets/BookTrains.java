@@ -6,19 +6,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 import com.tms.beans.HistoryBean;
 import com.tms.beans.TrainBean;
@@ -35,93 +28,92 @@ import com.tms.utils.TrainUtil;
 @WebServlet("/booktrains")
 public class BookTrains extends HttpServlet {
 
-	private TrainService trainService = new TrainServiceImpl();
-	private BookingService bookingService = new BookingServiceImpl();
+    private TrainService trainService = new TrainServiceImpl();
+    private BookingService bookingService = new BookingServiceImpl();
 
-	public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
-		PrintWriter pw = res.getWriter();
-		res.setContentType("text/html");
-		TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+        res.setContentType("text/html;charset=UTF-8");
+        PrintWriter pw = res.getWriter();
 
-		RequestDispatcher rd = req.getRequestDispatcher("UserHome.html");
-		rd.include(req, res);
+        // Validate user role
+        TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
 
-		ServletContext sct = req.getServletContext();
+        // Include user home header
+       
 
-		try {
-			int seat = (int) sct.getAttribute("seats");
-			String trainNo = (String) sct.getAttribute("trainnumber");
-			String journeyDate = (String) sct.getAttribute("journeydate");
-			String seatClass = (String) sct.getAttribute("class");
+        // Begin Bootstrap container for results
+        pw.println("<div class='container my-5'>");
 
-			String userMailId = TrainUtil.getCurrentUserEmail(req);
+        ServletContext sct = req.getServletContext();
+        try {
+            int seatsRequested = (int) sct.getAttribute("seats");
+            String trainNo = (String) sct.getAttribute("trainnumber");
+            String journeyDate = (String) sct.getAttribute("journeydate");
+            String seatClass = (String) sct.getAttribute("class");
+            String userMailId = TrainUtil.getCurrentUserEmail(req);
 
-			SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
-			SimpleDateFormat outputFormat = new SimpleDateFormat("dd-MMM-yyyy");
-			java.util.Date utilDate;
-			String date = LocalDate.now().toString();
-			utilDate = inputFormat.parse(journeyDate);
-			date = outputFormat.format(utilDate);
+            // Format journey date
+            SimpleDateFormat inputFmt = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat outputFmt = new SimpleDateFormat("dd-MMM-yyyy");
+            java.util.Date utilDate = inputFmt.parse(journeyDate);
+            String formattedDate = outputFmt.format(utilDate);
 
-			TrainBean train = trainService.getTrainById(trainNo);
+            TrainBean train = trainService.getTrainById(trainNo);
+            if (train == null) {
+                printAlert(pw, "Invalid Train Number!", "danger");
+            } else {
+                int availableSeats = train.getSeats();
+                if (seatsRequested > availableSeats) {
+                    printAlert(pw, "Only " + availableSeats + " seats are available on this train.", "warning");
+                } else {
+                    // Update seat count
+                    train.setSeats(availableSeats - seatsRequested);
+                    String responseCode = trainService.updateTrain(train);
 
-			if (train != null) {
-				int avail = train.getSeats();
-				if (seat > avail) {
-					pw.println("<div class='tab'><p1 class='menu red'>Only " + avail
-							+ " Seats are Available in this Train!</p1></div>");
+                    if (ResponseCode.SUCCESS.toString().equalsIgnoreCase(responseCode)) {
+                        // Create booking history
+                        HistoryBean booking = new HistoryBean();
+                        double totalAmount = train.getFare() * seatsRequested;
+                        booking.setAmount(totalAmount);
+                        booking.setFrom_stn(train.getFrom_stn());
+                        booking.setTo_stn(train.getTo_stn());
+                        booking.setTr_no(trainNo);
+                        booking.setSeats(seatsRequested);
+                        booking.setMailId(userMailId);
+                        booking.setDate(formattedDate);
 
-				} else if (seat <= avail) {
-					avail = avail - seat;
-					train.setSeats(avail);
-					String responseCode = trainService.updateTrain(train);
-					if (ResponseCode.SUCCESS.toString().equalsIgnoreCase(responseCode)) {
+                        HistoryBean transaction = bookingService.createHistory(booking);
+                        
+                        // Forward to GenerateTicket.jsp with required attributes
+                        req.setAttribute("txn", transaction);
+                        req.setAttribute("trainName", train.getTr_name());
+                        req.setAttribute("seatClass", seatClass);
+                        RequestDispatcher ticketDispatcher = req.getRequestDispatcher("GenerateTicket.jsp");
+                        ticketDispatcher.include(req, res);
+                    } else {
+                        printAlert(pw, "Transaction declined. Please try again.", "danger");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new TrainException(422, this.getClass().getName() + "_FAILED", e.getMessage());
+        } finally {
+            // Clean up context attributes
+            sct.removeAttribute("seats");
+            sct.removeAttribute("trainnumber");
+            sct.removeAttribute("journeydate");
+            sct.removeAttribute("class");
+        }
 
-						HistoryBean bookingDetails = new HistoryBean();
-						Double totalAmount = train.getFare() * seat;
-						bookingDetails.setAmount(totalAmount);
-						bookingDetails.setFrom_stn(train.getFrom_stn());
-						bookingDetails.setTo_stn(train.getTo_stn());
-						bookingDetails.setTr_no(trainNo);
-						bookingDetails.setSeats(seat);
-						bookingDetails.setMailId(userMailId);
-						bookingDetails.setDate(date);
+        pw.println("</div>"); // Close container
+    }
 
-						HistoryBean transaction = bookingService.createHistory(bookingDetails);
-						pw.println("<div class='tab'><p class='menu green'>" + seat
-								+ " Seats Booked Successfully!<br/><br/> Your Transaction Id is: "
-								+ transaction.getTransId() + "</p>" + "</div>");
-						pw.println("<div class='tab'>" + "<p class='menu'>" + "<table>"
-								+ "<tr><td>PNR No: </td><td colspan='3' style='color:blue;'>" + transaction.getTransId()
-								+ "</td></tr><tr><td>Train Name: </td><td>" + train.getTr_name()
-								+ "</td><td>Train No: </td><td>" + transaction.getTr_no()
-								+ "</td></tr><tr><td>Booked From: </td><td>" + transaction.getFrom_stn()
-								+ "</td><td>To Station: </td><td>" + transaction.getTo_stn() + "</td></tr>"
-								+ "<tr><td>Date Of Journey:</td><td>" + transaction.getDate()
-								+ "</td><td>Time(HH:MM):</td><td>11:23</td></tr><tr><td>Passangers: </td><td>"
-								+ transaction.getSeats() + "</td><td>Class: </td><td>" + seatClass + "</td></tr>"
-								+ "<tr><td>Booking Status: </td><td style='color:green;'>CNF/S10/35</td><td>Amount Paid:</td><td>&#8377; "
-								+ transaction.getAmount() + "</td></tr>" + "</table>" + "</p></div>");
-
-					} else {
-						pw.println(
-								"<div class='tab'><p1 class='menu red'>Transaction Declined. Try Again !</p1></div>");
-
-					}
-				}
-			} else {
-				pw.println("<div class='tab'><p1 class='menu'>Invalid Train Number !</p1></div>");
-
-			}
-
-		} catch (Exception e) {
-			throw new TrainException(422, this.getClass().getName() + "_FAILED", e.getMessage());
-		}
-
-		sct.removeAttribute("seat");
-		sct.removeAttribute("trainNo");
-		sct.removeAttribute("journeyDate");
-		sct.removeAttribute("class");
-	}
-
+    /** Utility to print Bootstrap alert messages */
+    private void printAlert(PrintWriter pw, String message, String type) {
+        pw.println("<div class='alert alert-" + type + " alert-dismissible fade show' role='alert'>");
+        pw.println("  " + message + "");
+        pw.println("  <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>");
+        pw.println("</div>");
+    }
 }

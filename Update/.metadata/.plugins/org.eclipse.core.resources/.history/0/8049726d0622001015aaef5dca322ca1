@@ -1,0 +1,413 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!doctype html>
+<html>
+<head>
+    <meta charset="ISO-8859-1">
+    <title>Secure Payment | National Ticket Booking Spot</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --dark-color: #2b2d42;
+            --light-color: #f8f9fa;
+            --success-color: #4bb543;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0.8rem 1rem;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .payment-container {
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+        
+        .payment-card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .payment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-header::after {
+            content: "";
+            position: absolute;
+            bottom: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+        
+        .card-header h4 {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .payment-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .payment-icons img {
+            width: 50px;
+            height: auto;
+            filter: brightness(0) invert(1);
+            transition: all 0.3s ease;
+        }
+        
+        .payment-icons img:hover {
+            transform: scale(1.1);
+        }
+        
+        .card-body {
+            padding: 2rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control {
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+        
+        .input-group-text {
+            background-color: #f8f9fa;
+            border-radius: 8px 0 0 8px;
+        }
+        
+        .card-footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .btn-pay {
+            background: linear-gradient(135deg, var(--success-color) 0%, #2e8b57 100%);
+            border: none;
+            padding: 12px 24px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(75, 181, 67, 0.3);
+        }
+        
+        .btn-pay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(75, 181, 67, 0.4);
+        }
+        
+        .btn-pay:active {
+            transform: translateY(0);
+        }
+        
+        .card-preview {
+            background: linear-gradient(135deg, #2b2d42 0%, #4a4e69 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .card-preview:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .card-chip {
+            width: 50px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-number {
+            font-family: 'Courier New', monospace;
+            font-size: 1.3rem;
+            letter-spacing: 1px;
+            margin-bottom: 1.5rem;
+            word-spacing: 8px;
+        }
+        
+        .card-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+        
+        .card-holder {
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        .card-expiry {
+            text-align: right;
+        }
+        
+        .card-logo {
+            text-align: right;
+            margin-top: 1rem;
+        }
+        
+        .card-logo img {
+            height: 30px;
+            filter: brightness(0) invert(1);
+        }
+        
+        .animate__delay-02s {
+            animation-delay: 0.2s;
+        }
+        
+        .animate__delay-04s {
+            animation-delay: 0.4s;
+        }
+        
+        @media (max-width: 768px) {
+            .payment-container {
+                padding: 0 15px;
+            }
+            
+            .card-header h4 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <i class="bi bi-train-front me-2"></i>National Ticket Booking Spot
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="userhome"><i class="bi bi-house-door me-1"></i>Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="userviewtrainfwd"><i class="bi bi-train-front me-1"></i>View Trains</a></li>
+          <li class="nav-item"><a class="nav-link" href="trainbwstnfwd"><i class="bi bi-signpost-split me-1"></i>Trains Between Stations</a></li>
+          <li class="nav-item"><a class="nav-link" href="bookingdetails"><i class="bi bi-clock-history me-1"></i>Booking History</a></li>
+          <li class="nav-item"><a class="nav-link" href="fareenqfwd"><i class="bi bi-cash-coin me-1"></i>Fare Enquiry</a></li>
+          <li class="nav-item"><a class="nav-link" href="useravailfwd"><i class="bi bi-person-check me-1"></i>Seat Availability</a></li>
+          <li class="nav-item"><a class="nav-link" href="usersearchtrain"><i class="bi bi-search me-1"></i>Search By TrainNo</a></li>
+          <li class="nav-item"><a class="nav-link" href="userprofile"><i class="bi bi-person-circle me-1"></i>Profile</a></li>
+        </ul>
+        <div class="d-flex">
+          <a class="btn btn-light" href="userlogout"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
+        </div>
+      </div>
+    </div>
+</nav>
+
+<!-- Payment Form -->
+<div class="container payment-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="payment-card animate__animated animate__fadeInUp">
+                <div class="card-header">
+                    <h4><i class="bi bi-credit-card me-2"></i>Secure Payment Gateway</h4>
+                    <div class="payment-icons">
+                        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/visa.svg" alt="Visa">
+                        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/mastercard.svg" alt="Mastercard">
+                        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/americanexpress.svg" alt="American Express">
+                        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/paypal.svg" alt="PayPal">
+                    </div>
+                </div>
+                <form action="booktrains" method="post">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4 animate__animated animate__fadeInLeft animate__delay-02s">
+                                <div class="card-preview">
+                                    <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/simfill.svg" class="card-chip" alt="Chip">
+                                    <div class="card-number">•••• •••• •••• ••••</div>
+                                    <div class="card-details">
+                                        <div class="card-holder">CARD HOLDER</div>
+                                        <div class="card-expiry">MM/YY</div>
+                                    </div>
+                                    <div class="card-logo">
+                                        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/mastercard.svg" alt="Card Logo">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 animate__animated animate__fadeInRight animate__delay-02s">
+                                <div class="mb-4">
+                                    <label for="cardNumber" class="form-label">Card Number</label>
+                                    <div class="input-group">
+                                        <input type="tel" class="form-control" id="cardNumber" placeholder="1234 5678 9012 3456" required 
+                                               pattern="[0-9]{16}" maxlength="16" oninput="formatCardNumber(this)">
+                                        <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <label for="expiryDate" class="form-label">Expiration Date</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="expiryDate" placeholder="MM/YY" required 
+                                                   pattern="(0[1-9]|1[0-2])\/[0-9]{2}" maxlength="5" oninput="formatExpiry(this)">
+                                            <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label for="cvv" class="form-label">CVV</label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control" id="cvv" placeholder="•••" required 
+                                                   pattern="[0-9]{3,4}" maxlength="4">
+                                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="cardName" class="form-label">Cardholder Name</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="cardName" placeholder="As on card" required>
+                                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer animate__animated animate__fadeInUp animate__delay-04s">
+                        <button type="submit" class="btn btn-pay">
+                            <i class="bi bi-lock-fill me-2"></i>Confirm Payment of ₹${amount}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Format card number with spaces
+    function formatCardNumber(input) {
+        // Remove all non-digit characters
+        let value = input.value.replace(/\D/g, '');
+        
+        // Add space after every 4 digits
+        value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+        
+        // Update the input value
+        input.value = value;
+        
+        // Update the card preview
+        const cardNumberDisplay = document.querySelector('.card-number');
+        if (value.trim() === '') {
+            cardNumberDisplay.textContent = '•••• •••• •••• ••••';
+        } else {
+            // Show first 4 digits and mask the rest
+            const visiblePart = value.substring(0, 4);
+            const maskedPart = value.length > 4 ? ' •••• •••• ' + (value.length > 12 ? '••••' : value.substring(12)) : '';
+            cardNumberDisplay.textContent = visiblePart + maskedPart;
+        }
+    }
+    
+    // Format expiry date with slash
+    function formatExpiry(input) {
+        let value = input.value.replace(/\D/g, '');
+        
+        if (value.length > 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        
+        input.value = value;
+        
+        // Update card preview
+        const expiryDisplay = document.querySelector('.card-expiry');
+        if (value.trim() === '') {
+            expiryDisplay.textContent = 'MM/YY';
+        } else {
+            expiryDisplay.textContent = value;
+        }
+    }
+    
+    // Update cardholder name in preview
+    document.getElementById('cardName').addEventListener('input', function(e) {
+        const nameDisplay = document.querySelector('.card-holder');
+        if (e.target.value.trim() === '') {
+            nameDisplay.textContent = 'CARD HOLDER';
+        } else {
+            nameDisplay.textContent = e.target.value.toUpperCase();
+        }
+    });
+    
+    // Update card logo based on card number
+    document.getElementById('cardNumber').addEventListener('input', function(e) {
+        const cardLogo = document.querySelector('.card-logo img');
+        const firstDigit = e.target.value.charAt(0);
+        
+        if (firstDigit === '4') {
+            cardLogo.src = 'https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/visa.svg';
+        } else if (firstDigit === '5') {
+            cardLogo.src = 'https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/mastercard.svg';
+        } else if (firstDigit === '3') {
+            cardLogo.src = 'https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/americanexpress.svg';
+        } else {
+            cardLogo.src = 'https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/creditcard.svg';
+        }
+    });
+</script>
+</body>
+</html>

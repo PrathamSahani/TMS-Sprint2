@@ -1,50 +1,62 @@
+// ChangeUserPassword.java (GET)
 package com.tms.servlets;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
+import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 import com.tms.constant.UserRole;
 import com.tms.utils.TrainUtil;
 
-//import com.shashi.beans.UserBean;
-
 @SuppressWarnings("serial")
 @WebServlet("/changeuserpassword")
 public class ChangeUserPassword extends HttpServlet {
-	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
-		res.setContentType("text/html");
-		PrintWriter pw = res.getWriter();
-		TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
+    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+        res.setContentType("text/html");
+        PrintWriter pw = res.getWriter();
+        TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
 
-		RequestDispatcher rd = req.getRequestDispatcher("UserHome.html");
-		rd.include(req, res);
-		pw.println("<div class='tab'>" + "		<p1 class='menu'>" + "	Hello " + TrainUtil.getCurrentUserName(req)
-				+ " ! Welcome to our new NITRTC Website" + "		</p1>" + "	</div>");
-		pw.println("<div class='main'><p1 class='menu'><a href='viewuserprofile'>View Profile</a></p1>&nbsp;"
-				+ "<p1 class='menu'><a href='edituserprofile'>Edit Profile</a></p1>&nbsp;"
-				+ "<p1 class='menu'><a href='changeuserpassword'>Change Password</a></p1>" + "</div>");
-		pw.println("<div class='tab'>Password Change</div>");
-		pw.println("<div class='tab'>" + "<table><form action='changeuserpwd' method='post'>"
-				+ "<tr><td>User Name :</td><td><input type='text' name='username' placeholder='Enter Your MailId'></td></tr>"
-				+ "<tr><td>Old Password :</td><td><input type='password' name='oldpassword'></td></tr>"
-				+ "<tr><td>New Password :</td><td><input type='password' name='newpassword'></td></tr>"
-				+ "<tr><td></td><td><input type='submit' name='submit' value='Change Password'></td></tr>"
-				+ "</form></table>" + "</div>");
+        RequestDispatcher rd = req.getRequestDispatcher("UserHome.jsp");
+        rd.include(req, res);
 
-	}
+        String cp = req.getContextPath();
 
+        pw.println("<div class='container d-flex flex-column justify-content-center align-items-center' style='min-height:70vh;'>");
+
+        // optional alert
+        String msg = req.getParameter("msg"), type = req.getParameter("msgType");
+        if (msg != null && !msg.isEmpty()) {
+            String alertClass = "success".equals(msg) ? "alert-success" : "alert-danger";
+            pw.println("<div class='alert " + alertClass + " alert-dismissible fade show' role='alert'>");
+            pw.println(msg);
+            pw.println("<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>");
+            pw.println("</div>");
+        }
+
+        // form
+        pw.println("  <div class='row justify-content-center w-100'>");
+        pw.println("    <div class='col-md-6'>");
+        pw.println("      <div class='card shadow-sm'>");
+        pw.println("        <div class='card-header text-center'><h4>Change Password</h4></div>");
+        pw.println("        <div class='card-body'>");
+        pw.println("          <form action='" + cp + "/changeuserpwd' method='post'>");
+        pw.println("            <div class='mb-3 row'><label class='col-sm-4 col-form-label'>User Name:</label><div class='col-sm-8'><input type='text' name='username' class='form-control' placeholder='Enter Your MailId'></div></div>");
+        pw.println("            <div class='mb-3 row'><label class='col-sm-4 col-form-label'>Old Password:</label><div class='col-sm-8'><input type='password' name='oldpassword' class='form-control'></div></div>");
+        pw.println("            <div class='mb-3 row'><label class='col-sm-4 col-form-label'>New Password:</label><div class='col-sm-8'><input type='password' name='newpassword' class='form-control'></div></div>");
+        pw.println("            <div class='text-center'><button type='submit' class='btn btn-primary'>Change Password</button></div>");
+        pw.println("          </form>");
+        pw.println("        </div>");
+        pw.println("      </div>");
+        pw.println("    </div>");
+        pw.println("  </div>");
+
+        pw.println("</div>");  // flex container
+
+        pw.println("<footer class='footer bg-light py-3'>");
+        pw.println("  <div class='container text-center'><span class='text-muted'>&copy; 2025 NITRTC. All rights reserved.</span></div>");
+        pw.println("</footer>");
+    }
 }

@@ -1,0 +1,26 @@
+package com.tms.servlets;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+import jakarta.servlet.RequestDispatcher;
+
+import com.tms.constant.UserRole;
+import com.tms.utils.TrainUtil;
+
+@SuppressWarnings("serial")
+@WebServlet("/trainbwstnfwd")
+public class TrainBwStnFwd extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse res)
+            throws IOException, ServletException {
+        res.setContentType("text/html");
+        TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
+        RequestDispatcher rd = req.getRequestDispatcher("TrainBwStn.jsp");
+        rd.forward(req, res);
+    }
+}

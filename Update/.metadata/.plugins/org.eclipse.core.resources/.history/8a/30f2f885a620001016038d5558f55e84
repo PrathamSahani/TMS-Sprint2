@@ -1,0 +1,54 @@
+package com.tms.servlets;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+
+import jakarta.servlet.RequestDispatcher;
+
+import com.tms.beans.TrainBean;
+import com.tms.beans.TrainException;
+import com.tms.constant.UserRole;
+import com.tms.service.TrainService;
+import com.tms.service.impl.TrainServiceImpl;
+import com.tms.utils.TrainUtil;
+
+@SuppressWarnings("serial")
+@WebServlet("/trainbwstn")
+public class TrainBwStn extends HttpServlet {
+    private TrainService trainService = new TrainServiceImpl();
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse res)
+            throws IOException, ServletException {
+        // ensure user is authorized
+        TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
+
+        String fromStation = req.getParameter("fromstation");
+        String toStation = req.getParameter("tostation");
+        try {
+            List<TrainBean> trains = trainService.getTrainsBetweenStations(fromStation, toStation);
+            req.setAttribute("fromStation", fromStation);
+            req.setAttribute("toStation", toStation);
+
+            if (trains != null && !trains.isEmpty()) {
+                // pass the list to JSP
+                req.setAttribute("trains", trains);
+                RequestDispatcher rd = req.getRequestDispatcher("UserHome.jsp");
+                rd.forward(req, res);
+            } else {
+                // no results case
+                req.setAttribute("noResultsMessage",
+                    "There are no trains between " + fromStation + " and " + toStation + ".");
+                RequestDispatcher rd = req.getRequestDispatcher("TrainBwStn.jsp");
+                rd.forward(req, res);
+            }
+        } catch (Exception e) {
+            throw new TrainException(422, this.getClass().getName() + "_FAILED", e.getMessage());
+        }
+    }
+}

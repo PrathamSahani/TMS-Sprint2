@@ -40,7 +40,7 @@ public class TicketBookingHistory extends HttpServlet {
 			String customerId = TrainUtil.getCurrentUserEmail(req);
 			List<HistoryBean> details = bookingService.getAllBookingsByCustomerId(customerId);
 			if (details != null && !details.isEmpty()) {
-				RequestDispatcher rd = req.getRequestDispatcher("UserViewTrains.html");
+				RequestDispatcher rd = req.getRequestDispatcher("UserViewTrains.jsp");
 				rd.include(req, res);
 				pw.println("<div class='main'><p1 class='menu'>Booked Ticket History</p1></div>");
 				pw.println("<div class='tab'><table><tr><th>Transaction ID</th><th>Train Number</th>"
@@ -55,7 +55,7 @@ public class TicketBookingHistory extends HttpServlet {
 				}
 				pw.println("</table></div>");
 			} else {
-				RequestDispatcher rd = req.getRequestDispatcher("UserViewTrains.html");
+				RequestDispatcher rd = req.getRequestDispatcher("UserViewTrains.jsp");
 				rd.include(req, res);
 				pw.println("<div class='main'><p1 class='menu red'> No any ticket booked, book your first ticket now!!</p1></div>");
 			}

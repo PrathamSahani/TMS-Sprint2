@@ -1,0 +1,81 @@
+package com.tms.servlets;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import com.tms.constant.UserRole;
+import com.tms.utils.TrainUtil;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+import jakarta.servlet.RequestDispatcher;
+
+import com.tms.constant.UserRole;
+import com.tms.beans.UserBean;
+import com.tms.utils.TrainUtil;
+
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+import jakarta.servlet.RequestDispatcher;
+
+import com.tms.constant.UserRole;
+import com.tms.beans.UserBean;
+import com.tms.utils.TrainUtil;
+
+package com.tms.servlets;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import com.tms.constant.UserRole;
+import com.tms.utils.TrainUtil;
+import com.tms.beans.UserBean;
+
+import java.io.IOException;
+
+@SuppressWarnings("serial")
+@WebServlet("/changeuserpassword")
+public class ChangeUserPassword extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse res)
+            throws IOException, ServletException {
+        // ensure only logged-in customers can access
+        TrainUtil.validateUserAuthorization(req, UserRole.CUSTOMER);
+
+        // make the current user and action available to JSP
+        UserBean ub = TrainUtil.getCurrentCustomer(req);
+        req.setAttribute("user", ub);
+        req.setAttribute("action", "change");
+
+        // forward to the unified JSP
+        req.getRequestDispatcher("Username.jsp").forward(req, res);
+    }
+}

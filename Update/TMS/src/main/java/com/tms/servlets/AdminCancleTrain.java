@@ -1,15 +1,5 @@
 package com.tms.servlets;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -24,43 +14,38 @@ import com.tms.service.TrainService;
 import com.tms.service.impl.TrainServiceImpl;
 import com.tms.utils.TrainUtil;
 
+import java.io.IOException;
+
 @WebServlet("/admincancletrain")
 public class AdminCancleTrain extends HttpServlet {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private TrainService trainService = new TrainServiceImpl();
+    private static final long serialVersionUID = 1L;
+    private final TrainService trainService = new TrainServiceImpl();
 
-	/**
-	 * 
-	 * @param req
-	 * @param res
-	 * @throws IOException
-	 * @throws ServletException
-	 */
-	protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
-		res.setContentType("text/html");
-		PrintWriter pw = res.getWriter();
-		TrainUtil.validateUserAuthorization(req, UserRole.ADMIN);
-		try {
-			String trainNo = req.getParameter("trainno");
-			String message = trainService.deleteTrainById(trainNo);
-			if (ResponseCode.SUCCESS.toString().equalsIgnoreCase(message)) {
-				RequestDispatcher rd = req.getRequestDispatcher("CancleTrain.html");
-				rd.include(req, res);
-				pw.println("<div class='main'><p1 class='menu'>Train number " + trainNo
-						+ " has been Deleted Successfully.</p1></div>");
-			} else {
-				RequestDispatcher rd = req.getRequestDispatcher("CancleTrain.html");
-				rd.include(req, res);
-				pw.println("<div class='tab'><p1 class='menu'>Train No." + trainNo + " is Not Available !</p1></div>");
-			}
-		} catch (Exception e) {
-			throw new TrainException(422, this.getClass().getName() + "_FAILED", e.getMessage());
-		}
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse res)
+            throws IOException, ServletException {
+        // enforce admin authorization
+        TrainUtil.validateUserAuthorization(req, UserRole.ADMIN);
 
-	}
+        try {
+            String trainNo = req.getParameter("trainno");
+            String result = trainService.deleteTrainById(trainNo);
 
+            String message;
+            if (ResponseCode.SUCCESS.toString().equalsIgnoreCase(result)) {
+                message = "Train number " + trainNo + " has been deleted successfully.";
+            } else {
+                message = "Train No. " + trainNo + " is not available!";
+            }
+
+            // pass message to JSP and forward
+            req.setAttribute("message", message);
+            RequestDispatcher rd = req.getRequestDispatcher("CancleTrain.jsp");
+            rd.forward(req, res);
+
+        } catch (Exception e) {
+            throw new TrainException(422, this.getClass().getName() + "_FAILED", e.getMessage());
+        }
+    }
 }

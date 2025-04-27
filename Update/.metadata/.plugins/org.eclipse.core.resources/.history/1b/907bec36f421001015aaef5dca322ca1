@@ -1,0 +1,114 @@
+<%@ page import="com.tms.beans.UserBean" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+    // Retrieve action and user (may be null if default)
+    String action = (String) request.getAttribute("action");
+    UserBean user = (UserBean) request.getAttribute("user");
+
+    // For the default landing (UserProfile), username is passed as a String
+    String username = (String) request.getAttribute("username");
+    if (username == null && user != null) {
+        username = user.getFName();
+    }
+%>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>User Dashboard</title>
+    <!-- You can switch to a locally hosted bootstrap.css if you prefer no CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-4">
+    <h4>Hello, <%= username %>!</h4>
+    <p>Welcome to our new NITRTC Website</p>
+
+    <!-- Nav Tabs -->
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link <%= "view".equals(action) ? "active" : "" %>" href="viewuserprofile">View Profile</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link <%= "edit".equals(action) ? "active" : "" %>" href="edituserprofile">Edit Profile</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link <%= "change".equals(action) ? "active" : "" %>" href="changeuserpassword">Change Password</a>
+      </li>
+    </ul>
+
+    <!-- VIEW PROFILE -->
+    <% if ("view".equals(action) && user != null) { %>
+      <div class="card mt-3">
+        <div class="card-header">User Profile</div>
+        <div class="card-body">
+          <table class="table table-bordered">
+            <tr><td>User Name</td><td><%= user.getMailId() %></td></tr>
+            <tr><td>Password</td><td><input type="password" disabled value="<%= user.getPWord() %>"/></td></tr>
+            <tr><td>First Name</td><td><%= user.getFName() %></td></tr>
+            <tr><td>Last Name</td><td><%= user.getLName() %></td></tr>
+            <tr><td>Address</td><td><%= user.getAddr() %></td></tr>
+            <tr><td>Phone No</td><td><%= user.getPhNo() %></td></tr>
+            <tr><td>Mail Id</td><td><%= user.getMailId() %></td></tr>
+          </table>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- EDIT PROFILE -->
+    <% if ("edit".equals(action) && user != null) { %>
+      <form class="mt-3" method="post" action="updateuserprofile">
+        <input type="hidden" name="mail" value="<%= user.getMailId() %>"/>
+        <div class="mb-3">
+          <label>First Name</label>
+          <input class="form-control" type="text" name="firstname" value="<%= user.getFName() %>">
+        </div>
+        <div class="mb-3">
+          <label>Last Name</label>
+          <input class="form-control" type="text" name="lastname" value="<%= user.getLName() %>">
+        </div>
+        <div class="mb-3">
+          <label>Address</label>
+          <input class="form-control" type="text" name="address" value="<%= user.getAddr() %>">
+        </div>
+        <div class="mb-3">
+          <label>Phone No</label>
+          <input class="form-control" type="text" name="phone" value="<%= user.getPhNo() %>">
+        </div>
+        <button class="btn btn-primary" type="submit">Update Profile</button>
+      </form>
+    <% } %>
+
+    <!-- CHANGE PASSWORD -->
+    <% if ("change".equals(action) && user != null) { %>
+      <div class="card mt-3">
+        <div class="card-header">Change Password</div>
+        <div class="card-body">
+          <% String error = (String) request.getAttribute("error");
+             if (error != null) { %>
+            <div class="alert alert-danger"><%= error %></div>
+          <% } %>
+          <form method="post" action="changeuserpwd">
+            <div class="mb-3">
+              <label>Username</label>
+              <input class="form-control" type="text" name="username" value="<%= user.getMailId() %>" readonly>
+            </div>
+            <div class="mb-3">
+              <label>Old Password</label>
+              <input class="form-control" type="password" name="oldpassword" required>
+            </div>
+            <div class="mb-3">
+              <label>New Password</label>
+              <input class="form-control" type="password" name="newpassword" required>
+            </div>
+            <button class="btn btn-primary" type="submit">Update Password</button>
+          </form>
+        </div>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Bootstrap JS (can be local) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
